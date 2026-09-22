@@ -1,0 +1,30 @@
+name: Deploy Render service
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Trigger Render deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "Missing repository secret: RENDER_DEPLOY_HOOK_URL" >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --retry 3 \
+            --request POST \
+            "$RENDER_DEPLOY_HOOK_URL"
+          echo "Render deploy triggered successfully."

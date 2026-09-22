@@ -60,6 +60,26 @@ In **Settings → Variables and Secrets**, add a plain-text variable named
 `https://web-cloner-x3a3.onrender.com`. Add it for the production environment
 and redeploy. This is a proxy configuration value, not a secret.
 
+### Automatic Render deploys from GitHub
+
+The workflow `.github/workflows/deploy-render.yml` triggers a Render deploy
+after every push to `master`, including changes to the Cloudflare Worker. It
+uses the Render deploy hook without exposing the URL in the repository or in
+Cloudflare.
+
+Because a deploy hook is a credential, rotate/regenerate it in Render if it has
+ever been shared publicly. Then add the replacement URL in GitHub under
+**Settings → Secrets and variables → Actions → New repository secret**:
+
+```text
+Name: RENDER_DEPLOY_HOOK_URL
+Secret: <the newly regenerated Render deploy hook URL>
+```
+
+You can also run the workflow manually from the GitHub **Actions** tab. A
+Cloudflare dashboard-only change does not create a GitHub push; only changes
+committed to this repository trigger both deployments.
+
 ## Requirements 📦
 
 - Node.js 20 or newer
