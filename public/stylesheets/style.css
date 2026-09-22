@@ -273,3 +273,32 @@ body.modal-open { overflow: hidden; }
 @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-rise { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 480px) { .download-modal-card { padding: 25px 21px 21px; } .modal-actions { flex-direction: column-reverse; align-items: stretch; } .modal-secondary, .modal-direct { width: 100%; } }
+
+
+/* Refined archive handoff */
+.download-dock { position: relative; overflow: hidden; margin-top: 19px; padding: 18px; border: 1px solid #cfe4d8; border-radius: 14px; background: linear-gradient(135deg, #f8fcfa 0%, #edf8f2 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+.download-dock::before { position: absolute; top: -34px; right: -30px; width: 120px; height: 120px; border: 1px solid rgba(255,115,95,.18); border-radius: 50%; content: ''; }
+.download-dock::after { position: absolute; top: -18px; right: 12px; width: 54px; height: 54px; border: 1px dashed rgba(255,115,95,.2); border-radius: 50%; content: ''; }
+.download-dock > * { position: relative; z-index: 1; }
+.download-dock-head { margin-bottom: 14px; }
+.download-dock-head strong { font-size: .82rem; letter-spacing: -.025em; }
+.dock-eyebrow { color: var(--coral); font-size: .57rem; font-weight: 500; }
+.dock-state { display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border: 1px solid transparent; border-radius: 999px; font-size: .55rem; }
+.dock-state::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ''; }
+.dock-state.waiting { color: #a15c2d; border-color: #f5cfac; background: #fff0df; }
+.dock-state.ready { color: #19714e; border-color: #b8e2c9; background: #ddf7e7; }
+.dock-state.failed { color: #a1483e; border-color: #f0b9b1; background: #ffe5e0; }
+.download-dock .result-button { min-height: 52px; border-radius: 10px; font-size: .8rem; letter-spacing: -.01em; }
+.download-dock .result-button.download-waiting { color: #fffaf4; background: linear-gradient(135deg, #e3a45d, #cf8742); box-shadow: 0 9px 18px rgba(186, 122, 54, .2); }
+.download-dock .result-button.download-waiting:hover { background: linear-gradient(135deg, #d9944b, #bd7635); transform: translateY(-1px); }
+.download-dock .result-button.download-ready { background: linear-gradient(135deg, #ff806b, #ec5d4d); box-shadow: 0 10px 21px rgba(255, 115, 95, .24); }
+.download-dock .result-button.download-ready:hover { background: linear-gradient(135deg, #ff715c, #dd5142); }
+.download-help-toggle { display: flex !important; align-items: center; gap: 10px; width: 100%; margin: 11px 0 0; padding: 10px 11px; color: #61736a; border: 1px solid #d5e7dc; border-radius: 9px; background: rgba(255,255,255,.66); cursor: pointer; font-size: .65rem; text-align: left; transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease; }
+.download-help-toggle:hover, .download-help-toggle:focus-visible { color: var(--forest); border-color: #9fcdb2; outline: none; background: var(--white); transform: translateY(-1px); }
+.help-button-icon { display: grid; width: 23px; height: 23px; flex: 0 0 23px; place-items: center; color: #a8662e; border-radius: 7px; background: #ffe6ca; font-weight: 800; }
+.help-button-copy { display: flex; flex: 1; flex-direction: column; gap: 2px; }
+.help-button-copy strong { color: var(--forest); font-size: .65rem; }
+.help-button-copy small { color: #84938c; font-size: .58rem; }
+.help-button-arrow { color: var(--coral); font-size: .95rem; font-weight: 800; }
+.download-dock-hint { display: flex; align-items: flex-start; gap: 6px; margin: 11px 2px 0; font-size: .61rem; }
+.download-dock-hint::before { width: 5px; height: 5px; flex: 0 0 5px; margin-top: 4px; border-radius: 50%; background: #42b883; content: ''; }
