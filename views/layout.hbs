@@ -23,6 +23,7 @@
     let numberOfFiles = 0;
     let logBuffer = '';
     let startedAt = 0;
+    let archiveReady = false;
     const downloadWebsite = document.getElementById('downloadResult');
     const downloadBtn = document.getElementById('download');
     const websiteInput = document.getElementById('website');
@@ -36,6 +37,17 @@
     const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
     const filesCount = document.getElementById('nFiles');
     const log = document.getElementById('log');
+    const downloadDockTitle = document.getElementById('downloadDockTitle');
+    const downloadDockState = document.getElementById('downloadDockState');
+    const downloadResultLabel = document.getElementById('downloadResultLabel');
+    const downloadDockHint = document.getElementById('downloadDockHint');
+    const downloadHelpToggle = document.getElementById('downloadHelpToggle');
+    const downloadModal = document.getElementById('downloadModal');
+    const downloadModalTitle = document.getElementById('downloadModalTitle');
+    const downloadModalCopy = document.getElementById('downloadModalCopy');
+    const downloadModalDirect = document.getElementById('downloadModalDirect');
+    const downloadModalClose = document.getElementById('downloadModalClose');
+    const downloadModalDismiss = document.getElementById('downloadModalDismiss');
 
     const socket = io.connect(document.URL);
     if (!localStorage['token']) localStorage['token'] = generateToken(20);
@@ -47,11 +59,8 @@
     }
 
     function hostname(value) {
-      try {
-        return new URL(normalizeWebsite(value)).hostname.replace(/^www\./i, '');
-      } catch (error) {
-        return 'your website';
-      }
+      try { return new URL(normalizeWebsite(value)).hostname.replace(/^www\./i, ''); }
+      catch (error) { return 'your website'; }
     }
 
     function setStage(stage) {
@@ -70,6 +79,58 @@
       progressPercent.textContent = label[1];
     }
 
+    function setDownloadWaiting() {
+      archiveReady = false;
+      downloadWebsite.dataset.ready = 'false';
+      downloadWebsite.setAttribute('aria-disabled', 'true');
+      downloadWebsite.classList.remove('download-ready');
+      downloadWebsite.classList.add('download-waiting');
+      downloadWebsite.removeAttribute('href');
+      downloadResultLabel.textContent = 'Download website assets';
+      downloadDockTitle.textContent = 'Download not started yet';
+      downloadDockState.textContent = 'Waiting';
+      downloadDockState.className = 'dock-state waiting';
+      downloadDockHint.textContent = 'This button activates a direct ZIP download when your archive is ready.';
+      downloadHelpToggle.style.display = 'none';
+    }
+
+    function setDownloadReady(file) {
+      archiveReady = true;
+      const directUrl = '/sites/' + file + '.zip';
+      downloadWebsite.href = directUrl;
+      downloadWebsite.dataset.ready = 'true';
+      downloadWebsite.removeAttribute('aria-disabled');
+      downloadWebsite.classList.remove('download-waiting');
+      downloadWebsite.classList.add('download-ready');
+      downloadResultLabel.textContent = 'Download website assets';
+      downloadDockTitle.textContent = 'Your archive is ready';
+      downloadDockState.textContent = 'Ready';
+      downloadDockState.className = 'dock-state ready';
+      downloadDockHint.textContent = 'If your browser pauses the download, use the direct-download help below.';
+      downloadHelpToggle.style.display = 'block';
+      downloadModalDirect.href = directUrl;
+    }
+
+    function openDownloadModal() {
+      if (archiveReady) {
+        downloadModalTitle.textContent = 'Download did not start?';
+        downloadModalCopy.textContent = 'Some browsers pause automatic downloads or extensions intercept them. Use the direct link below to start the ZIP download manually.';
+        downloadModalDirect.hidden = false;
+      } else {
+        downloadModalTitle.textContent = 'Your archive is still being prepared';
+        downloadModalCopy.textContent = 'Keep this tab open while WebCloner finishes collecting and packaging the accessible files. The direct download will activate here when it is ready.';
+        downloadModalDirect.hidden = true;
+      }
+      downloadModal.hidden = false;
+      document.body.classList.add('modal-open');
+      (archiveReady ? downloadModalDirect : downloadModalDismiss).focus();
+    }
+
+    function closeDownloadModal() {
+      downloadModal.hidden = true;
+      document.body.classList.remove('modal-open');
+    }
+
     function resetProgress() {
       numberOfFiles = 0;
       logBuffer = '';
@@ -82,6 +143,7 @@
       progressBar.hidden = false;
       progressBar.setAttribute('aria-busy', 'true');
       setStage('discover');
+      setDownloadWaiting();
     }
 
     function appendLog(message) {
@@ -104,6 +166,10 @@
         progressPanel.hidden = false;
         progressSummary.textContent = 'The capture could not finish.';
         progressStatus.textContent = event.error;
+        downloadDockTitle.textContent = 'Capture stopped';
+        downloadDockState.textContent = 'Try again';
+        downloadDockState.className = 'dock-state failed';
+        downloadDockHint.textContent = 'Review the status above, then start a fresh capture when ready.';
         setStage('failed');
         log.textContent = event.error;
         downloadBtn.disabled = false;
@@ -126,8 +192,7 @@
         progressSummary.textContent = 'Your capture is ready to download.';
         progressStatus.textContent = 'Completed in ' + Math.max(1, Math.round((Date.now() - startedAt) / 1000)) + 's · ' + numberOfFiles + ' files captured.';
         appendLog('Archive created successfully.\n');
-        downloadWebsite.style.display = 'inline-flex';
-        downloadWebsite.href = '/sites/' + event.file + '.zip';
+        setDownloadReady(event.file);
         downloadBtn.disabled = false;
       } else {
         setStage(numberOfFiles > 0 ? 'collect' : 'discover');
@@ -142,8 +207,6 @@
       if (!website) return;
       websiteInput.value = website;
       resetProgress();
-      downloadWebsite.style.display = 'none';
-      downloadBtn.disabled = true;
       socket.emit('request', { token: localStorage['token'], website: website });
     }
 
@@ -151,6 +214,20 @@
       event.preventDefault();
       startDownload();
     });
+    downloadWebsite.addEventListener('click', function(event) {
+      if (!archiveReady) { event.preventDefault(); openDownloadModal(); }
+    });
+    downloadHelpToggle.addEventListener('click', openDownloadModal);
+    downloadModalClose.addEventListener('click', closeDownloadModal);
+    downloadModalDismiss.addEventListener('click', closeDownloadModal);
+    downloadModal.addEventListener('click', function(event) {
+      if (event.target.hasAttribute('data-close-download-modal')) closeDownloadModal();
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && !downloadModal.hidden) closeDownloadModal();
+    });
+
+    setDownloadWaiting();
 
     function generateToken(length) {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
