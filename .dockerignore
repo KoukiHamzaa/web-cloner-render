@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log*
+downloads
+public/sites/*.zip
+.git
+.github
+Dockerfile
+.dockerignore

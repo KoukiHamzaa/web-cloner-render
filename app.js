@@ -19,6 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Used by container and platform health checks without opening a download job.
+app.get('/healthz', function(req, res) {
+  res.status(200).type('text/plain').send('ok');
+});
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
