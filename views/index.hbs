@@ -84,7 +84,24 @@
           <details class="raw-log"><summary>View technical log</summary><pre class="log" id="log" aria-label="Download log"></pre></details>
         </section>
 
-        <a class="result-button" id="downloadResult" href="">Download website assets <span aria-hidden="true">↓</span></a>
+        <div class="download-dock" aria-live="polite">
+          <div class="download-dock-head"><div><span class="dock-eyebrow">Archive handoff</span><strong id="downloadDockTitle">Download not started yet</strong></div><span class="dock-state waiting" id="downloadDockState">Waiting</span></div>
+          <a class="result-button download-waiting" id="downloadResult" href="" data-ready="false" aria-disabled="true" aria-describedby="downloadDockHint"><span id="downloadResultLabel">Download website assets</span><span aria-hidden="true">↓</span></a>
+          <button class="download-help-toggle" id="downloadHelpToggle" type="button">Download not starting? <span>Open direct-download help</span></button>
+          <p class="download-dock-hint" id="downloadDockHint">This button activates a direct ZIP download when your archive is ready.</p>
+        </div>
+
+        <div class="download-modal" id="downloadModal" hidden>
+          <div class="download-modal-backdrop" data-close-download-modal></div>
+          <div class="download-modal-card" role="dialog" aria-modal="true" aria-labelledby="downloadModalTitle" aria-describedby="downloadModalCopy">
+            <button class="modal-close" id="downloadModalClose" type="button" aria-label="Close download help">×</button>
+            <span class="modal-icon" aria-hidden="true">↓</span>
+            <p class="eyebrow">Download handoff</p>
+            <h3 id="downloadModalTitle">Your archive is still being prepared</h3>
+            <p id="downloadModalCopy">Keep this tab open while WebCloner finishes collecting and packaging the accessible files. The direct download will activate here when it is ready.</p>
+            <div class="modal-actions"><button class="modal-secondary" id="downloadModalDismiss" type="button">Keep waiting</button><a class="modal-direct" id="downloadModalDirect" href="" hidden>Try direct download <span aria-hidden="true">↗</span></a></div>
+          </div>
+        </div>
         <p class="permission-note"><span aria-hidden="true">ⓘ</span> Only capture websites and content you own or have permission to reproduce.</p>
       </div>
     </div>
