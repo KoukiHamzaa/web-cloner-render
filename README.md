@@ -33,6 +33,8 @@ This repository is a **Node.js/Express backend**, not a static site. It starts a
 
 Deploy it to a container/Node service instead. The included `Dockerfile` installs `wget`, installs the locked dependencies, starts the server, and exposes port `3000`. Configure the service to use the repository Dockerfile and set its health check to `GET /healthz`. The application honors the platform's `PORT` variable and also supports `DOWNLOAD_QUOTA` and `DOWNLOAD_TIMEOUT_MS`.
 
+For Render, use **New → Blueprint** and select this repository. The included `render.yaml` configures a Free Docker web service, the health check, and the safe default download limits automatically. You can also create a Web Service manually and select Docker with `Dockerfile` as the Dockerfile path.
+
 If Cloudflare is required, use Cloudflare only as a proxy/custom domain in front of the Node service. A Pages deployment can host a separate static frontend, but it cannot host this downloader backend without a separate compatible server.
 
 ## Requirements 📦
