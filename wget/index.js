@@ -149,10 +149,12 @@ function parseTarget(input) {
   var raw = input.trim();
   var url;
   try {
-    // Only assume http:// when no scheme was given at all. Prefixing a value
+    // Prefer HTTPS when no scheme was given. This avoids an HTTP-to-HTTPS
+    // redirect leaving wget with only the initial HTML document on sites that
+    // serve their assets from the secure canonical URL. Prefixing a value
     // that already has one turns file:///etc/passwd into a request for a host
     // called "file" instead of rejecting it.
-    url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : 'http://' + raw);
+    url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : 'https://' + raw);
   } catch (err) {
     return null;
   }
