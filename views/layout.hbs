@@ -113,7 +113,8 @@
         sitePreviewStatus.textContent = 'Thumbnail unavailable';
         sitePreviewCaption.textContent = 'Capture continues without a visual thumbnail · ' + siteName;
       };
-      sitePreviewImage.src = 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(siteUrl) + '?w=960';
+      const previewTarget = siteUrl.replace(/[^A-Za-z0-9._~:\/\/-]/g, function(character) { return encodeURIComponent(character); });
+      sitePreviewImage.src = 'https://image.thum.io/get/width/960/crop/640/noanimate/' + previewTarget;
     }
 
     function setDownloadWaiting() {
