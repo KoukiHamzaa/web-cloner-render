@@ -37,6 +37,29 @@ For Render, use **New → Blueprint** and select this repository. The included `
 
 If Cloudflare is required, use Cloudflare only as a proxy/custom domain in front of the Node service. A Pages deployment can host a separate static frontend, but it cannot host this downloader backend without a separate compatible server.
 
+### Optional Cloudflare Worker proxy
+
+The repository also includes a small Cloudflare Worker proxy in
+`cloudflare/worker.js`. It lets Cloudflare provide the public hostname while
+Render runs the downloader backend. The proxy preserves normal requests,
+Socket.IO polling, and WebSocket upgrade requests.
+
+The root `wrangler.jsonc` points Wrangler at this Worker and sets
+`BACKEND_URL` to the Render service. In Cloudflare Workers & Pages, the
+deployment settings should be:
+
+| Setting | Value |
+| --- | --- |
+| Build command | Leave empty / None |
+| Deploy command | `npx wrangler deploy` |
+| Version command | `npx wrangler versions upload` |
+| Root directory | `/` |
+
+In **Settings → Variables and Secrets**, add a plain-text variable named
+`BACKEND_URL` with the Render URL, for example
+`https://web-cloner-x3a3.onrender.com`. Add it for the production environment
+and redeploy. This is a proxy configuration value, not a secret.
+
 ## Requirements 📦
 
 - Node.js 20 or newer
