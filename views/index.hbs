@@ -79,6 +79,15 @@
               <li class="progress-step" id="progressStep4" data-state="idle"><span class="step-dot">04</span><span><strong>Ready</strong><small>Archive is complete</small></span></li>
             </ol>
           </div>
+          <div class="site-preview-panel" id="sitePreviewPanel" hidden>
+            <div class="site-preview-head"><span><span class="preview-live-dot"></span> Source preview</span><span id="sitePreviewStatus">Preparing</span></div>
+            <div class="site-preview-frame">
+              <div class="site-preview-skeleton" id="sitePreviewSkeleton" aria-hidden="true"><span></span><span></span><span></span><div></div></div>
+              <img class="site-preview-image" id="sitePreviewImage" alt="Preview of the website being captured" hidden />
+              <div class="site-preview-fallback" id="sitePreviewFallback" hidden><span id="sitePreviewInitial">W</span><strong id="sitePreviewDomain">Preparing preview</strong><small>This site does not allow a visual thumbnail. Capture progress is still running.</small></div>
+            </div>
+            <p class="site-preview-caption" id="sitePreviewCaption">A visual reference will appear while the archive is being built.</p>
+          </div>
           <div class="progress-track"><span></span></div>
           <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to capture.</p>
           <details class="raw-log"><summary>View technical log</summary><pre class="log" id="log" aria-label="Download log"></pre></details>
