@@ -48,10 +48,19 @@ module.exports = (socket, data, onFinished) => {
 
   // execFile rather than exec: the address is passed as a separate argument and
   // never reaches a shell, so it cannot be used to run other commands.
+  var crawlDomains = [target.hostname];
+  if (target.hostname.indexOf('www.') === 0) {
+    crawlDomains.push(target.hostname.slice(4));
+  } else {
+    crawlDomains.push('www.' + target.hostname);
+  }
+
   var child = execFile('wget', [
     '-mkEpnp',
     '--no-if-modified-since',
     '--quota=' + QUOTA,
+    '--span-hosts',
+    '--domains=' + crawlDomains.join(','),
     target.href
   ], { cwd: jobDir, maxBuffer: 32 * 1024 * 1024 });
 
