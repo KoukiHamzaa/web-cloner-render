@@ -5,7 +5,7 @@ WORKDIR /app
 
 # The downloader invokes wget directly, so it must exist in the runtime image.
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends wget \
+  && apt-get install -y --no-install-recommends ca-certificates wget \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
