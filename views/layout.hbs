@@ -91,7 +91,7 @@
       downloadDockState.textContent = 'Waiting';
       downloadDockState.className = 'dock-state waiting';
       downloadDockHint.textContent = 'This button activates a direct ZIP download when your archive is ready.';
-      downloadHelpToggle.style.display = 'none';
+      downloadHelpToggle.style.display = 'flex';
     }
 
     function setDownloadReady(file) {
@@ -217,7 +217,7 @@
     downloadWebsite.addEventListener('click', function(event) {
       if (!archiveReady) { event.preventDefault(); openDownloadModal(); }
     });
-    downloadHelpToggle.addEventListener('click', openDownloadModal);
+    downloadHelpToggle.addEventListener('click', function() { openDownloadModal(); });
     downloadModalClose.addEventListener('click', closeDownloadModal);
     downloadModalDismiss.addEventListener('click', closeDownloadModal);
     downloadModal.addEventListener('click', function(event) {
