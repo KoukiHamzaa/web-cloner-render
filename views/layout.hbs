@@ -48,6 +48,14 @@
     const downloadModalDirect = document.getElementById('downloadModalDirect');
     const downloadModalClose = document.getElementById('downloadModalClose');
     const downloadModalDismiss = document.getElementById('downloadModalDismiss');
+    const sitePreviewPanel = document.getElementById('sitePreviewPanel');
+    const sitePreviewImage = document.getElementById('sitePreviewImage');
+    const sitePreviewSkeleton = document.getElementById('sitePreviewSkeleton');
+    const sitePreviewFallback = document.getElementById('sitePreviewFallback');
+    const sitePreviewStatus = document.getElementById('sitePreviewStatus');
+    const sitePreviewCaption = document.getElementById('sitePreviewCaption');
+    const sitePreviewDomain = document.getElementById('sitePreviewDomain');
+    const sitePreviewInitial = document.getElementById('sitePreviewInitial');
 
     const socket = io.connect(document.URL);
     if (!localStorage['token']) localStorage['token'] = generateToken(20);
@@ -77,6 +85,35 @@
       const label = labels[stage] || ['Idle', '0%'];
       progressPhase.textContent = label[0];
       progressPercent.textContent = label[1];
+    }
+
+
+    function loadSitePreview(value) {
+      const siteUrl = normalizeWebsite(value);
+      const siteName = hostname(siteUrl);
+      sitePreviewPanel.hidden = false;
+      sitePreviewStatus.textContent = 'Loading';
+      sitePreviewCaption.textContent = 'Source preview · ' + siteName;
+      sitePreviewDomain.textContent = siteName;
+      sitePreviewInitial.textContent = siteName.charAt(0).toUpperCase() || 'W';
+      sitePreviewSkeleton.hidden = false;
+      sitePreviewFallback.hidden = true;
+      sitePreviewImage.hidden = true;
+      sitePreviewImage.onload = function() {
+        sitePreviewSkeleton.hidden = true;
+        sitePreviewFallback.hidden = true;
+        sitePreviewImage.hidden = false;
+        sitePreviewStatus.textContent = 'Live reference';
+        sitePreviewCaption.textContent = 'Live source reference · ' + siteName;
+      };
+      sitePreviewImage.onerror = function() {
+        sitePreviewSkeleton.hidden = true;
+        sitePreviewImage.hidden = true;
+        sitePreviewFallback.hidden = false;
+        sitePreviewStatus.textContent = 'Thumbnail unavailable';
+        sitePreviewCaption.textContent = 'Capture continues without a visual thumbnail · ' + siteName;
+      };
+      sitePreviewImage.src = 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(siteUrl) + '?w=960';
     }
 
     function setDownloadWaiting() {
@@ -146,6 +183,7 @@
       progressBar.setAttribute('aria-busy', 'true');
       setStage('discover');
       setDownloadWaiting();
+      loadSitePreview(websiteInput.value);
     }
 
     function appendLog(message) {
@@ -195,6 +233,7 @@
         progressStatus.textContent = 'Completed in ' + Math.max(1, Math.round((Date.now() - startedAt) / 1000)) + 's · ' + numberOfFiles + ' files captured.';
         appendLog('Archive created successfully.\n');
         setDownloadReady(event.file);
+        sitePreviewStatus.textContent = 'Captured reference';
         downloadBtn.disabled = false;
       } else {
         setStage(numberOfFiles > 0 ? 'collect' : 'discover');
