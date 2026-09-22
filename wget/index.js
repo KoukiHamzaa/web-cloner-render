@@ -48,12 +48,7 @@ module.exports = (socket, data, onFinished) => {
 
   // execFile rather than exec: the address is passed as a separate argument and
   // never reaches a shell, so it cannot be used to run other commands.
-  var crawlDomains = [target.hostname];
-  if (target.hostname.indexOf('www.') === 0) {
-    crawlDomains.push(target.hostname.slice(4));
-  } else {
-    crawlDomains.push('www.' + target.hostname);
-  }
+  var crawlDomains = buildCrawlDomains(target.hostname);
 
   var child = execFile('wget', [
     '-mkEpnp',
@@ -171,6 +166,19 @@ function parseTarget(input) {
   if (!url.hostname) return null;
   return url;
 }
+
+function buildCrawlDomains(hostname) {
+  var domains = [hostname];
+  if (hostname.indexOf('www.') === 0) {
+    domains.push(hostname.slice(4));
+  } else {
+    domains.push('www.' + hostname);
+  }
+  return domains;
+}
+
+module.exports.parseTarget = parseTarget;
+module.exports.buildCrawlDomains = buildCrawlDomains;
 
 /**
  * wget's closing lines are usually a summary, so the last line is rarely the

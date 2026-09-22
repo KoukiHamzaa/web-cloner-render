@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "export NODE_ENV=Development && npm start",
-    "test": "node --check app.js && node --check bin/www && node --check routes/index.js && node --check wget/index.js && node --check socket/socket.js"
+    "test": "node --check app.js && node --check bin/www && node --check routes/index.js && node --check wget/index.js && node --check socket/socket.js && node test/wget-acceptance.test.js"
   },
   "dependencies": {
     "archiver": "^3.1.1",
