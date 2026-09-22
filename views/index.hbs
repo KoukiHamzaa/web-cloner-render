@@ -36,6 +36,11 @@
         <div class="card-topline">
           <span class="live-indicator"><span></span> Ready to capture</span>
           <span class="card-kicker">New project</span>
+          <div class="capture-intent">
+            <span class="intent-icon" aria-hidden="true">⌁</span>
+            <span><strong>Authorized source</strong><small>Private workflow · no account needed</small></span>
+            <span class="intent-badge">ZIP</span>
+          </div>
         </div>
         <div class="card-heading">
           <h2>Start with a website URL</h2>
@@ -60,12 +65,23 @@
 
         <section class="progress-panel" id="downloadProgress" hidden aria-labelledby="progress-title">
           <div class="progress-summary">
-            <strong id="progress-title">Capture status</strong>
+            <div><strong id="progress-title">Capture status</strong><p id="progressSummary">Waiting for a capture to begin.</p></div>
             <span class="download-count" id="nFilesP">Files downloaded: <span id="nFiles">0</span></span>
+          </div>
+          <div class="capture-progress-grid">
+            <div class="progress-orbit" id="progressRing" data-state="idle" aria-hidden="true">
+              <div class="orbit-core"><span id="progressPhase">Idle</span><strong id="progressPercent">0%</strong></div>
+            </div>
+            <ol class="progress-steps" aria-label="Capture stages">
+              <li class="progress-step" id="progressStep1" data-state="idle"><span class="step-dot">01</span><span><strong>Discover</strong><small>Reading the page</small></span></li>
+              <li class="progress-step" id="progressStep2" data-state="idle"><span class="step-dot">02</span><span><strong>Collect</strong><small>Fetching accessible files</small></span></li>
+              <li class="progress-step" id="progressStep3" data-state="idle"><span class="step-dot">03</span><span><strong>Package</strong><small>Preparing your ZIP</small></span></li>
+              <li class="progress-step" id="progressStep4" data-state="idle"><span class="step-dot">04</span><span><strong>Ready</strong><small>Archive is complete</small></span></li>
+            </ol>
           </div>
           <div class="progress-track"><span></span></div>
           <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to capture.</p>
-          <pre class="log" id="log" aria-label="Download log"></pre>
+          <details class="raw-log"><summary>View technical log</summary><pre class="log" id="log" aria-label="Download log"></pre></details>
         </section>
 
         <a class="result-button" id="downloadResult" href="">Download website assets <span aria-hidden="true">↓</span></a>
