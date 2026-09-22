@@ -1,3 +1,7 @@
+<header>
+  <div aria-busy="true" id="progress" hidden aria-label="Downloading" role="progressbar"></div>
+</header>
+
 <main role="main">
   <section class="downloader-card" aria-labelledby="page-title">
     <img class="brand-mark" src="https://www.google.com/inbox/assets/images/intro/intro-logo.png" alt="" />
@@ -31,8 +35,15 @@
       </a>
     </div>
 
-    <p class="download-count" hidden id="nFilesP">Downloaded files: <span id="nFiles">0</span></p>
-    <p class="log" id="log" role="status" aria-live="polite"></p>
+    <section class="progress-panel" id="downloadProgress" hidden aria-labelledby="progress-title">
+      <div class="progress-summary">
+        <strong id="progress-title">Download status</strong>
+        <span class="download-count" id="nFilesP">Files downloaded: <span id="nFiles">0</span></span>
+      </div>
+      <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to download.</p>
+      <pre class="log" id="log" aria-label="Download log"></pre>
+    </section>
+
     <a class="result-button" id="downloadResult" href="">Download website assets</a>
   </section>
 </main>

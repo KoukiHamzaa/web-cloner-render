@@ -183,10 +183,30 @@ h1 {
   height: auto;
 }
 
-.download-count {
-  margin: 1.5rem 0 0;
-  color: #617089;
+.progress-panel {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d8e2ee;
+  border-radius: 14px;
+  background: #f8fafd;
+  text-align: left;
+}
+
+.progress-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #26364f;
   font-size: 0.9rem;
+}
+
+.download-count {
+  margin: 0;
+  color: #617089;
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .download-count span {
@@ -194,14 +214,25 @@ h1 {
   font-weight: 700;
 }
 
+.progress-status {
+  margin: 0.7rem 0 0;
+  color: #168aad;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .log {
-  min-height: 1.5rem;
   max-width: 100%;
-  margin: 1rem 0 0;
+  height: 8rem;
+  margin: 0.65rem 0 0;
+  padding: 0.7rem;
+  overflow: auto;
   overflow-wrap: anywhere;
+  border-radius: 8px;
   color: #52627a;
-  font-size: 0.9rem;
-  line-height: 1.45;
+  background: #eef3f8;
+  font: 0.75rem/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: pre-wrap;
 }
 
 .result-button {
@@ -233,6 +264,15 @@ h1 {
   }
 
   .download-button { width: auto; min-width: 140px; }
+}
+
+@media (max-width: 420px) {
+  .progress-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .download-count { white-space: normal; }
 }
 
 @media (prefers-reduced-motion: reduce) {
