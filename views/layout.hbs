@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel='stylesheet' href='/stylesheets/style.css' />
 
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
@@ -27,7 +28,7 @@
 
 <script>
   var numberOfFiles = 0;
-  const downloadWebsite = document.getElementsByClassName('btn-success')[0];
+  const downloadWebsite = document.getElementById('downloadResult');
   const downloadBtn = document.getElementById('download');
   const websiteInput = document.getElementById('website');
   const progressBar = document.getElementById('progress');
@@ -70,11 +71,8 @@
    {
         progressBar.hidden=true;
         log.textContent='Compressing completed successfully !'
-        downloadWebsite.style.display=''
-        downloadWebsite.onclick=function()
-        {
-         window.location='/sites/'+event.file+".zip";
-        }
+        downloadWebsite.style.display='inline-flex'
+        downloadWebsite.href='/sites/'+event.file+".zip";
         downloadBtn.disabled=false;
 
    }
@@ -130,4 +128,3 @@
 
 
 </html>
-
