@@ -22,82 +22,132 @@
   <script>
     let numberOfFiles = 0;
     let logBuffer = '';
+    let startedAt = 0;
     const downloadWebsite = document.getElementById('downloadResult');
     const downloadBtn = document.getElementById('download');
     const websiteInput = document.getElementById('website');
     const progressBar = document.getElementById('progress');
     const progressPanel = document.getElementById('downloadProgress');
     const progressStatus = document.getElementById('downloadStatus');
+    const progressSummary = document.getElementById('progressSummary');
+    const progressRing = document.getElementById('progressRing');
+    const progressPhase = document.getElementById('progressPhase');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
     const filesCount = document.getElementById('nFiles');
     const log = document.getElementById('log');
 
     const socket = io.connect(document.URL);
     if (!localStorage['token']) localStorage['token'] = generateToken(20);
 
+    function normalizeWebsite(value) {
+      const trimmed = value.trim();
+      if (!trimmed) return '';
+      return /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+    }
+
+    function hostname(value) {
+      try {
+        return new URL(normalizeWebsite(value)).hostname.replace(/^www\./i, '');
+      } catch (error) {
+        return 'your website';
+      }
+    }
+
+    function setStage(stage) {
+      const stageIndex = { discover: 0, collect: 1, package: 2, completed: 3 };
+      const activeIndex = stageIndex[stage];
+      progressSteps.forEach(function(step, index) {
+        if (stage === 'failed') step.dataset.state = index === 0 ? 'failed' : 'idle';
+        else if (stage === 'completed' || index < activeIndex) step.dataset.state = 'complete';
+        else if (index === activeIndex) step.dataset.state = 'active';
+        else step.dataset.state = 'idle';
+      });
+      progressRing.dataset.state = stage;
+      const labels = { discover: ['Discovering', '12%'], collect: ['Collecting', '50%'], package: ['Packaging', '82%'], completed: ['Ready', '100%'], failed: ['Stopped', '—'] };
+      const label = labels[stage] || ['Idle', '0%'];
+      progressPhase.textContent = label[0];
+      progressPercent.textContent = label[1];
+    }
+
     function resetProgress() {
       numberOfFiles = 0;
       logBuffer = '';
+      startedAt = Date.now();
       filesCount.textContent = '0';
       log.textContent = '';
-      progressStatus.textContent = 'Starting download...';
+      progressStatus.textContent = 'Opening ' + hostname(websiteInput.value) + '...';
+      progressSummary.textContent = 'Finding accessible resources.';
       progressPanel.hidden = false;
+      progressBar.hidden = false;
+      progressBar.setAttribute('aria-busy', 'true');
+      setStage('discover');
     }
 
     function appendLog(message) {
       if (typeof message !== 'string') return;
-      // wget reports a successful response for each downloaded resource. Count
-      // every match in a chunk because one Socket.IO event can contain several.
       numberOfFiles += (message.match(/\b200 OK\b/g) || []).length;
       filesCount.textContent = String(numberOfFiles);
       logBuffer += message;
-      // Keep the browser lightweight on very large websites.
       if (logBuffer.length > 12000) logBuffer = logBuffer.slice(-12000);
       log.textContent = logBuffer;
       log.scrollTop = log.scrollHeight;
     }
 
-    socket.on(localStorage['token'], (event) => {
+    socket.on(localStorage['token'], function(event) {
       if (!event) return;
       console.log(event);
 
       if (event.error) {
         progressBar.hidden = true;
+        progressBar.setAttribute('aria-busy', 'false');
         progressPanel.hidden = false;
-        progressStatus.textContent = 'Download failed';
+        progressSummary.textContent = 'The capture could not finish.';
+        progressStatus.textContent = event.error;
+        setStage('failed');
         log.textContent = event.error;
         downloadBtn.disabled = false;
         return;
       }
 
       progressBar.hidden = false;
+      progressBar.setAttribute('aria-busy', 'true');
       progressPanel.hidden = false;
 
       if (event.progress === 'Converting') {
-        progressStatus.textContent = `Downloaded ${numberOfFiles} files. Compressing archive...`;
+        setStage('package');
+        progressSummary.textContent = 'The archive is being assembled.';
+        progressStatus.textContent = 'Downloaded ' + numberOfFiles + ' files. Compressing archive...';
         appendLog('Converting downloaded files into a ZIP archive...\n');
       } else if (event.progress === 'Completed') {
+        setStage('completed');
         progressBar.hidden = true;
-        progressStatus.textContent = `Completed: ${numberOfFiles} files downloaded.`;
+        progressBar.setAttribute('aria-busy', 'false');
+        progressSummary.textContent = 'Your capture is ready to download.';
+        progressStatus.textContent = 'Completed in ' + Math.max(1, Math.round((Date.now() - startedAt) / 1000)) + 's · ' + numberOfFiles + ' files captured.';
         appendLog('Archive created successfully.\n');
         downloadWebsite.style.display = 'inline-flex';
         downloadWebsite.href = '/sites/' + event.file + '.zip';
         downloadBtn.disabled = false;
       } else {
-        progressStatus.textContent = `Downloading... ${numberOfFiles} files detected`;
+        setStage(numberOfFiles > 0 ? 'collect' : 'discover');
+        progressSummary.textContent = numberOfFiles > 0 ? 'Collecting accessible resources.' : 'Reading the page structure.';
+        progressStatus.textContent = 'Downloading... ' + numberOfFiles + ' files detected';
         appendLog(event.progress);
       }
     });
 
     function startDownload() {
-      const website = websiteInput.value.trim();
+      const website = normalizeWebsite(websiteInput.value);
       if (!website) return;
+      websiteInput.value = website;
       resetProgress();
       downloadWebsite.style.display = 'none';
       downloadBtn.disabled = true;
-      socket.emit('request', { token: localStorage['token'], website });
+      socket.emit('request', { token: localStorage['token'], website: website });
     }
 
-    document.getElementById('downloadForm').addEventListener('submit', (event) => {
+    document.getElementById('downloadForm').addEventListener('submit', function(event) {
       event.preventDefault();
       startDownload();
     });
@@ -105,9 +155,7 @@
     function generateToken(length) {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let token = '';
-      for (let i = 0; i < length; i++) {
-        token += chars[Math.floor(Math.random() * chars.length)];
-      }
+      for (let i = 0; i < length; i++) token += chars[Math.floor(Math.random() * chars.length)];
       return token;
     }
   </script>
