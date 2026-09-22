@@ -1,50 +1,137 @@
-<header>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="WebCloner home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" role="img"><path d="M8 4h10.5A5.5 5.5 0 0 1 24 9.5V20a5 5 0 0 1-5 5H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z"/><path d="M12 8h8a3 3 0 0 1 3 3v8"/><path d="M10 13h8M10 17h5"/></svg>
+      </span>
+      <span class="brand-name">Web<span>Cloner</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="#features">Features</a>
+      <a href="#workflow">How it works</a>
+      <a class="nav-cta" href="#capture">Start a capture <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+
+<header class="sr-only" aria-live="polite">
   <div aria-busy="true" id="progress" hidden aria-label="Downloading" role="progressbar"></div>
 </header>
 
 <main role="main">
-  <section class="downloader-card" aria-labelledby="page-title">
-    <img class="brand-mark" src="https://www.google.com/inbox/assets/images/intro/intro-logo.png" alt="" />
-    <h1 id="page-title">Website Downloader</h1>
-    <p class="subtitle">Download the source code and assets of any website.</p>
-
-    <form class="download-form" id="downloadForm">
-      <label class="sr-only" for="website">Website address</label>
-      <input
-        class="website-input"
-        type="text"
-        id="website"
-        inputmode="url"
-        autocomplete="url"
-        autocapitalize="none"
-        spellcheck="false"
-        placeholder="https://www.google.com"
-        aria-describedby="download-help"
-        required
-      />
-      <button class="download-button" id="download" type="submit">
-        <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
-        <span>Download</span>
-      </button>
-    </form>
-    <p class="sr-only" id="download-help">Enter a website address such as example.com or https://example.com.</p>
-
-    <div class="social-links">
-      <a class="github-button" href="https://github.com/AhmadIbrahiim/Website-downloader" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star Website Downloader on GitHub">Star on GitHub</a>
-      <a class="support-link" href="https://www.buymeacoffee.com/aibrahim" target="_blank" rel="noopener noreferrer">
-        <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Support the project" />
-      </a>
-    </div>
-
-    <section class="progress-panel" id="downloadProgress" hidden aria-labelledby="progress-title">
-      <div class="progress-summary">
-        <strong id="progress-title">Download status</strong>
-        <span class="download-count" id="nFilesP">Files downloaded: <span id="nFiles">0</span></span>
+  <section class="hero" id="capture" aria-labelledby="page-title">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Website capture, simplified</p>
+        <h1>Turn a website into a <em>portable</em> project.</h1>
+        <p class="hero-lede">Capture the source code and accessible assets from a website you own or are authorized to reproduce. Download a clean archive and keep moving.</p>
+        <div class="hero-proof" aria-label="Product highlights">
+          <span><strong>01</strong> Paste a URL</span>
+          <span><strong>02</strong> Capture assets</span>
+          <span><strong>03</strong> Download ZIP</span>
+        </div>
       </div>
-      <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to download.</p>
-      <pre class="log" id="log" aria-label="Download log"></pre>
-    </section>
 
-    <a class="result-button" id="downloadResult" href="">Download website assets</a>
+      <div class="capture-card">
+        <div class="card-topline">
+          <span class="live-indicator"><span></span> Ready to capture</span>
+          <span class="card-kicker">New project</span>
+        </div>
+        <div class="card-heading">
+          <h2>Start with a website URL</h2>
+          <p>Get the HTML, stylesheets, scripts, images, and other accessible resources in one archive.</p>
+        </div>
+
+        <form class="download-form" id="downloadForm">
+          <label class="sr-only" for="website">Website address</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">↗</span>
+            <input class="website-input" type="text" id="website" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="https://your-website.com" aria-describedby="download-help" required />
+          </div>
+          <button class="download-button" id="download" type="submit"><span>Start capture</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+        </form>
+        <p class="sr-only" id="download-help">Enter a website address such as example.com or https://example.com.</p>
+
+        <div class="capture-meta">
+          <span><span class="checkmark">✓</span> No account required</span>
+          <span><span class="checkmark">✓</span> ZIP export</span>
+          <span><span class="checkmark">✓</span> Live progress</span>
+        </div>
+
+        <section class="progress-panel" id="downloadProgress" hidden aria-labelledby="progress-title">
+          <div class="progress-summary">
+            <strong id="progress-title">Capture status</strong>
+            <span class="download-count" id="nFilesP">Files downloaded: <span id="nFiles">0</span></span>
+          </div>
+          <div class="progress-track"><span></span></div>
+          <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to capture.</p>
+          <pre class="log" id="log" aria-label="Download log"></pre>
+        </section>
+
+        <a class="result-button" id="downloadResult" href="">Download website assets <span aria-hidden="true">↓</span></a>
+        <p class="permission-note"><span aria-hidden="true">ⓘ</span> Only capture websites and content you own or have permission to reproduce.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-strip" aria-label="Capture capabilities">
+    <div class="stats-inner">
+      <div class="stat"><span class="stat-icon">⌁</span><span><strong>Full source capture</strong><small>HTML, CSS, JS and assets</small></span></div>
+      <div class="stat"><span class="stat-icon">↯</span><span><strong>Fast, focused workflow</strong><small>Paste, capture, download</small></span></div>
+      <div class="stat"><span class="stat-icon">⌘</span><span><strong>Built for real work</strong><small>Backup, migration, development</small></span></div>
+    </div>
+  </section>
+
+  <section class="content-section" id="features" aria-labelledby="features-title">
+    <div class="section-heading">
+      <p class="eyebrow">Everything in one place</p>
+      <h2 id="features-title">A better starting point for your next build.</h2>
+      <p>Whether you are moving a client site, preserving a project, or studying a layout, WebCloner keeps the first step simple.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card feature-card-tall">
+        <div class="feature-icon coral">⌘</div>
+        <p class="feature-label">01 / Capture</p>
+        <h3>Bring the whole front end with you.</h3>
+        <p>Collect the accessible files that make a site work — from page structure and styles to scripts, images, and linked resources.</p>
+        <div class="mini-browser" aria-hidden="true"><div class="mini-browser-bar"><i></i><i></i><i></i><span></span></div><div class="mini-browser-body"><b></b><b></b><b></b><div></div></div></div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon violet">↗</div>
+        <p class="feature-label">02 / Develop</p>
+        <h3>Make a local copy you can work with.</h3>
+        <p>Use the exported files for authorized development, testing, audits, and handoffs without repeatedly loading the live site.</p>
+        <a class="text-link" href="#workflow">See the workflow <span aria-hidden="true">→</span></a>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon mint">↓</div>
+        <p class="feature-label">03 / Export</p>
+        <h3>Leave with a clean ZIP archive.</h3>
+        <p>Download a portable snapshot that is easy to store, share with your team, or open in your local development environment.</p>
+        <a class="text-link" href="#capture">Start a capture <span aria-hidden="true">→</span></a>
+      </article>
+    </div>
+  </section>
+
+  <section class="workflow-section" id="workflow" aria-labelledby="workflow-title">
+    <div class="workflow-copy">
+      <p class="eyebrow">A calmer way to get started</p>
+      <h2 id="workflow-title">From live URL to local workspace in three steps.</h2>
+      <p>Skip the scattered downloads and manual asset hunting. WebCloner gives you a clear capture flow with progress you can actually follow.</p>
+    </div>
+    <ol class="steps-list">
+      <li><span class="step-number">01</span><span><strong>Enter an authorized URL</strong><small>Paste the website address you own or have permission to reproduce.</small></span></li>
+      <li><span class="step-number">02</span><span><strong>Capture accessible resources</strong><small>WebCloner downloads the source and linked assets it can reach.</small></span></li>
+      <li><span class="step-number">03</span><span><strong>Download your archive</strong><small>Open the ZIP locally and continue with your migration or build.</small></span></li>
+    </ol>
+  </section>
+
+  <section class="safety-card" id="safety" aria-labelledby="safety-title">
+    <div class="safety-symbol" aria-hidden="true">✓</div>
+    <div><p class="eyebrow">Designed for responsible workflows</p><h2 id="safety-title">Your authorization matters.</h2><p>WebCloner is intended for websites and content you own or are authorized to reproduce. It does not bypass logins, paywalls, or access controls, and technical access does not grant ownership of third-party content.</p></div>
   </section>
 </main>
+
+<footer class="site-footer">
+  <div class="footer-inner"><a class="brand" href="/" aria-label="WebCloner home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 4h10.5A5.5 5.5 0 0 1 24 9.5V20a5 5 0 0 1-5 5H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z"/><path d="M12 8h8a3 3 0 0 1 3 3v8"/><path d="M10 13h8M10 17h5"/></svg></span><span class="brand-name">Web<span>Cloner</span></span></a><p>Capture what you are authorized to build with.</p><a class="footer-link" href="https://github.com/KoukiHamzaa/Web-cloner" target="_blank" rel="noopener noreferrer">View on GitHub <span aria-hidden="true">↗</span></a></div>
+</footer>
