@@ -233,3 +233,43 @@ h1 em { color: var(--coral); font-style: normal; }
   .progress-summary { align-items: flex-start; }
   .download-count { text-align: right; white-space: normal; }
 }
+
+
+/* Persistent download handoff */
+.download-dock { margin-top: 17px; padding: 15px; border: 1px solid #dbe8e1; border-radius: 11px; background: #f7fbf9; }
+.download-dock-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
+.download-dock-head strong { display: block; color: var(--forest); font-size: .76rem; letter-spacing: -.015em; }
+.dock-eyebrow { display: block; margin-bottom: 4px; color: #91a099; font: .58rem 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.dock-state { padding: 5px 7px; border-radius: 5px; font: 500 .57rem 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+.dock-state.waiting { color: #a15c2d; background: #ffead7; }
+.dock-state.ready { color: #19714e; background: #d9f4e5; }
+.dock-state.failed { color: #a1483e; background: #ffe1dc; }
+.download-dock .result-button { display: flex; width: 100%; min-height: 48px; margin: 0; border: 0; background: #e2aa68; box-shadow: 0 8px 16px rgba(186, 122, 54, .15); cursor: pointer; }
+.download-dock .result-button:hover { background: #cf8d4b; box-shadow: 0 10px 19px rgba(186, 122, 54, .2); }
+.download-dock .result-button.download-ready { background: var(--coral); box-shadow: 0 9px 18px rgba(255, 115, 95, .2); }
+.download-dock .result-button.download-ready:hover { background: #eb5e4c; }
+.download-dock .result-button[aria-disabled="true"] { color: #fffaf4; }
+.download-help-toggle { display: none; width: 100%; margin: 10px 0 0; padding: 0; color: #7b8983; border: 0; background: transparent; cursor: pointer; font-size: .63rem; text-align: left; }
+.download-help-toggle span { color: var(--forest); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.download-help-toggle:hover { color: var(--coral); }
+.download-dock-hint { margin: 10px 0 0; color: #8a9791; font-size: .62rem; line-height: 1.5; }
+.download-modal[hidden] { display: none; }
+.download-modal { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; }
+.download-modal-backdrop { position: absolute; inset: 0; background: rgba(17, 38, 33, .42); backdrop-filter: blur(5px); animation: modal-fade 160ms ease-out; }
+.download-modal-card { position: relative; z-index: 1; width: min(100%, 420px); padding: 30px; border: 1px solid #d9e8e0; border-radius: 16px; background: var(--white); box-shadow: 0 30px 90px rgba(14, 48, 40, .22); animation: modal-rise 200ms ease-out; }
+.modal-close { position: absolute; top: 14px; right: 15px; display: grid; width: 28px; height: 28px; place-items: center; color: #80908a; border: 0; border-radius: 50%; background: #f1f6f3; cursor: pointer; font-size: 1.25rem; line-height: 1; }
+.modal-close:hover { color: var(--forest); background: #e6f1eb; }
+.modal-icon { display: grid; width: 43px; height: 43px; margin-bottom: 23px; place-items: center; color: #b36d2e; border-radius: 12px; background: #ffead7; font-size: 1.3rem; font-weight: 800; }
+.download-modal-card .eyebrow { margin-bottom: 10px; }
+.download-modal-card h3 { max-width: 310px; margin-bottom: 12px; color: var(--ink); font-size: 1.45rem; letter-spacing: -.055em; line-height: 1.1; }
+.download-modal-card > p:not(.eyebrow) { margin-bottom: 24px; color: var(--muted); font-size: .78rem; line-height: 1.7; }
+.modal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.modal-secondary, .modal-direct { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; padding: 0 14px; border-radius: 8px; font-size: .73rem; font-weight: 800; text-decoration: none; }
+.modal-secondary { color: var(--forest); border: 1px solid #d4e4dc; background: var(--white); cursor: pointer; }
+.modal-secondary:hover { background: #f1f8f4; }
+.modal-direct { color: var(--white); background: var(--forest); }
+.modal-direct:hover { background: var(--forest-dark); }
+body.modal-open { overflow: hidden; }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-rise { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 480px) { .download-modal-card { padding: 25px 21px 21px; } .modal-actions { flex-direction: column-reverse; align-items: stretch; } .modal-secondary, .modal-direct { width: 100%; } }
