@@ -98,6 +98,7 @@
       archiveReady = true;
       const directUrl = '/sites/' + file + '.zip';
       downloadWebsite.href = directUrl;
+      downloadWebsite.setAttribute('download', file + '.zip');
       downloadWebsite.dataset.ready = 'true';
       downloadWebsite.removeAttribute('aria-disabled');
       downloadWebsite.classList.remove('download-waiting');
@@ -109,6 +110,7 @@
       downloadDockHint.textContent = 'If your browser pauses the download, use the direct-download help below.';
       downloadHelpToggle.style.display = 'block';
       downloadModalDirect.href = directUrl;
+      downloadModalDirect.setAttribute('download', file + '.zip');
     }
 
     function openDownloadModal() {
