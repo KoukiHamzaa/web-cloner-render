@@ -71,9 +71,8 @@ repository, updates flow through a public build mirror,
    `.github/workflows/sync-render-mirror.yml`.
 2. The workflow mirrors `master` to the public `web-cloner-render` repository
    using an SSH deploy key stored as the Actions secret `DEPLOY_RENDER_KEY`.
-3. When the mirror actually changed, the workflow calls the Render API to deploy
-   the service (`POST /v1/services/srv-dap2hce0tbcc7385tm8g/deploys`) using the
-   Actions secret `RENDER_API_KEY`.
+3. Render auto-deploys whenever the mirror's `master` changes (`autoDeploy` is
+   enabled on the service, deploy trigger `new_commit`).
 
 The public `web-cloner-render` repository is only ever updated by this workflow;
 do not edit it directly. If you later grant the Render GitHub integration access

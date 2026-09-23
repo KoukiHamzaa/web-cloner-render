@@ -27,22 +27,9 @@ jobs:
           REMOTE=$(git rev-parse mirror/master 2>/dev/null || echo "none")
           if [ "$LOCAL" = "$REMOTE" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Mirror already in sync — skipping deploy."
+            echo "Mirror already in sync — skipping."
           else
             git push --force mirror master:master
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Mirror updated to $LOCAL"
           fi
-      - name: Trigger Render deploy
-        if: steps.mirror.outputs.changed == 'true'
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          resp=$(curl --silent --show-error --fail-with-body \
-            --request POST \
-            --header "Authorization: Bearer $RENDER_API_KEY" \
-            --header "Content-Type: application/json" \
-            --data '{}' \
-            "https://api.render.com/v1/services/srv-dap2hce0tbcc7385tm8g/deploys")
-          echo "$resp"
-          echo "Render deploy triggered."
