@@ -1,0 +1,24 @@
+name: Sync Render Mirror
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to public render mirror
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_RENDER_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          git remote add mirror git@github.com:KoukiHamzaa/web-cloner-render.git
+          git push --force mirror master:master
