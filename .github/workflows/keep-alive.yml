@@ -13,8 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Render health endpoint
+        env:
+          HEALTH_URL: ${{ vars.RENDER_HEALTH_URL || 'https://web-cloner-x3a3.onrender.com/healthz' }}
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://web-cloner-x3a3.onrender.com/healthz || echo "000")
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
           echo "Render health check returned: $response"
           if [ "$response" != "200" ]; then
             echo "::warning::Render service returned $response (may still be cold-starting)"
