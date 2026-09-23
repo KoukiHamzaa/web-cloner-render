@@ -62,19 +62,23 @@ and redeploy. This is a proxy configuration value, not a secret.
 
 ### Automatic Render deploys from GitHub
 
-The workflow `.github/workflows/deploy-render.yml` triggers a Render deploy
-after every push to `master`, including changes to the Cloudflare Worker. It
-uses the Render deploy hook without exposing the URL in the repository or in
-Cloudflare.
+Render only fetches repositories that its GitHub integration has access to, and
+`KoukiHamzaa/Web-cloner` is private. To keep deploying without exposing this
+repository, updates flow through a public build mirror,
+`KoukiHamzaa/web-cloner-render`, which the workflow keeps in sync:
 
-Because a deploy hook is a credential, rotate/regenerate it in Render if it has
-ever been shared publicly. Then add the replacement URL in GitHub under
-**Settings → Secrets and variables → Actions → New repository secret**:
+1. A push to `master` in this (private) repository runs
+   `.github/workflows/sync-render-mirror.yml`.
+2. The workflow mirrors `master` to the public `web-cloner-render` repository
+   using an SSH deploy key stored as the Actions secret `DEPLOY_RENDER_KEY`.
+3. When the mirror actually changed, the workflow calls the Render API to deploy
+   the service (`POST /v1/services/srv-dap2hce0tbcc7385tm8g/deploys`) using the
+   Actions secret `RENDER_API_KEY`.
 
-```text
-Name: RENDER_DEPLOY_HOOK_URL
-Secret: <the newly regenerated Render deploy hook URL>
-```
+The public `web-cloner-render` repository is only ever updated by this workflow;
+do not edit it directly. If you later grant the Render GitHub integration access
+to private repositories, you can point the service back at this repository and
+drop the mirror.
 
 You can also run the workflow manually from the GitHub **Actions** tab. A
 Cloudflare dashboard-only change does not create a GitHub push; only changes
