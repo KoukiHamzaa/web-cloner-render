@@ -136,6 +136,28 @@ You can also run the workflow manually from the GitHub **Actions** tab. A
 Cloudflare dashboard-only change does not create a GitHub push; only changes
 committed to this repository trigger both deployments.
 
+### Keep-alive against free-tier spin-down
+
+Render free web services spin down after **15 minutes** without inbound traffic
+(an HTTP request or WebSocket message) and take about a minute to come back.
+To stop that, `lib/keepalive.js` has the app ping its own public
+`/healthz` endpoint every 10 minutes while it is awake — `/healthz` is a real
+application route (Render only intercepts `robots.txt` for a sleeping service,
+so that path would never wake it). It activates automatically on Render
+(`RENDER_EXTERNAL_URL` is present) and is a no-op locally, one ping fires
+immediately on boot and errors are logged without one failing a request.
+
+Two caveats to know before enabling it:
+
+- The keep-alive only *prevents* sleeping; a service that is already spun down
+  cannot ping itself awake, so the first cold start after a deploy/restart is
+  still paid.
+- Free plans include **750 instance-hours per workspace per month** — a service
+  kept awake around the clock consumes nearly the whole allowance, after which
+  Render suspends free services until the month resets. Set
+  `KEEP_AWAKE=false` (or a schedule that stops pinging) if you want the service
+  to sleep and save hours instead.
+
 ## Requirements 📦
 
 - Node.js 20 or newer (the adaptive engine uses the native `fetch` API)
@@ -164,6 +186,9 @@ committed to this repository trigger both deployments.
 | `STEALTH_MAX_PAGES` | `200` | Cap on recursive page fetches per capture |
 | `STEALTH_RESPECT_ROBOTS` | `true` | `false` lets the adaptive engine ignore robots.txt Disallow rules |
 | `STEALTH_REQUEST_TIMEOUT_MS` | `30000` | Per-request timeout for the adaptive engine's fetches |
+| `KEEP_AWAKE` | auto (Render) | `false` disables the self keep-alive on Render; `true` forces it locally |
+| `KEEP_AWAKE_URL` | `RENDER_EXTERNAL_URL` | Public URL the keep-alive pings (`/healthz`) |
+| `KEEP_AWAKE_INTERVAL_MS` | `600000` | Ping cadence; clamped between `60000` and `840000` (Render sleeps after 15 min idle) |
 
 ## Tests
 
