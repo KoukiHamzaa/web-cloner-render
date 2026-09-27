@@ -39,6 +39,18 @@ so zipping, cleanup, and the Socket.IO UI are unchanged. The adaptive engine is
 pure Node (native `fetch`, no extra runtime) and keeps the same quota and
 timeout, so a blocked bot challenge no longer means a failed download.
 
+### Design system 🎨
+
+The interface is a dark, product-focused capture console built from
+`DESIGN.md` — a self-contained design system documenting the palette,
+typography scale, components, and agent prompt guide. The look: a deep
+forest-black canvas (`#0b110f`), charcoal-green surface panels separated by
+hairline borders, a single emerald accent for the CTA and focus states, coral
+for signpost emphasis, and mint for success. Manrope handles all type with a
+tight negative-tracked display scale; DM Mono covers eyebrows, badges, and the
+technical log. The styling lives entirely in `public/stylesheets/style.css`
+(no CSS framework), so it renders offline.
+
 ### Deploy on cloud providers
 
 [![Run on Replit](https://binbashbanana.github.io/deploy-buttons/buttons/remade/replit.svg)](https://replit.com/github/AhmadIbrahiim/Website-downloader)
