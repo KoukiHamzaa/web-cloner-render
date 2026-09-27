@@ -1,0 +1,262 @@
+window.dataLayer = window.dataLayer || [];
+function gtag() { dataLayer.push(arguments); }
+gtag('js', new Date());
+gtag('config', 'UA-120895783-4');
+
+let numberOfFiles = 0;
+let logBuffer = '';
+let startedAt = 0;
+let archiveReady = false;
+const downloadWebsite = document.getElementById('downloadResult');
+const downloadBtn = document.getElementById('download');
+const websiteInput = document.getElementById('website');
+const progressBar = document.getElementById('progress');
+const progressPanel = document.getElementById('downloadProgress');
+const progressStatus = document.getElementById('downloadStatus');
+const progressSummary = document.getElementById('progressSummary');
+const progressRing = document.getElementById('progressRing');
+const progressPhase = document.getElementById('progressPhase');
+const progressPercent = document.getElementById('progressPercent');
+const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
+const filesCount = document.getElementById('nFiles');
+const log = document.getElementById('log');
+const downloadDockTitle = document.getElementById('downloadDockTitle');
+const downloadDockState = document.getElementById('downloadDockState');
+const downloadResultLabel = document.getElementById('downloadResultLabel');
+const downloadDockHint = document.getElementById('downloadDockHint');
+const downloadHelpToggle = document.getElementById('downloadHelpToggle');
+const downloadModal = document.getElementById('downloadModal');
+const downloadModalTitle = document.getElementById('downloadModalTitle');
+const downloadModalCopy = document.getElementById('downloadModalCopy');
+const downloadModalDirect = document.getElementById('downloadModalDirect');
+const downloadModalClose = document.getElementById('downloadModalClose');
+const downloadModalDismiss = document.getElementById('downloadModalDismiss');
+const sitePreviewPanel = document.getElementById('sitePreviewPanel');
+const sitePreviewImage = document.getElementById('sitePreviewImage');
+const sitePreviewSkeleton = document.getElementById('sitePreviewSkeleton');
+const sitePreviewFallback = document.getElementById('sitePreviewFallback');
+const sitePreviewStatus = document.getElementById('sitePreviewStatus');
+const sitePreviewCaption = document.getElementById('sitePreviewCaption');
+const sitePreviewDomain = document.getElementById('sitePreviewDomain');
+const sitePreviewInitial = document.getElementById('sitePreviewInitial');
+
+const socket = io.connect(document.URL);
+if (!localStorage['token']) localStorage['token'] = generateToken(20);
+
+function normalizeWebsite(value) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+}
+
+function hostname(value) {
+  try { return new URL(normalizeWebsite(value)).hostname.replace(/^www\./i, ''); }
+  catch (error) { return 'your website'; }
+}
+
+function setStage(stage) {
+  const stageIndex = { discover: 0, collect: 1, package: 2, completed: 3 };
+  const activeIndex = stageIndex[stage];
+  progressSteps.forEach(function(step, index) {
+    if (stage === 'failed') step.dataset.state = index === 0 ? 'failed' : 'idle';
+    else if (stage === 'completed' || index < activeIndex) step.dataset.state = 'complete';
+    else if (index === activeIndex) step.dataset.state = 'active';
+    else step.dataset.state = 'idle';
+  });
+  progressRing.dataset.state = stage;
+  const labels = { discover: ['Discovering', '12%'], collect: ['Collecting', '50%'], package: ['Packaging', '82%'], completed: ['Ready', '100%'], failed: ['Stopped', '—'] };
+  const label = labels[stage] || ['Idle', '0%'];
+  progressPhase.textContent = label[0];
+  progressPercent.textContent = label[1];
+}
+
+
+function loadSitePreview(value) {
+  const siteUrl = normalizeWebsite(value);
+  const siteName = hostname(siteUrl);
+  sitePreviewPanel.hidden = false;
+  sitePreviewStatus.textContent = 'Loading';
+  sitePreviewCaption.textContent = 'Source preview · ' + siteName;
+  sitePreviewDomain.textContent = siteName;
+  sitePreviewInitial.textContent = siteName.charAt(0).toUpperCase() || 'W';
+  sitePreviewSkeleton.hidden = false;
+  sitePreviewFallback.hidden = true;
+  sitePreviewImage.hidden = true;
+  sitePreviewImage.onload = function() {
+    sitePreviewSkeleton.hidden = true;
+    sitePreviewFallback.hidden = true;
+    sitePreviewImage.hidden = false;
+    sitePreviewStatus.textContent = 'Live reference';
+    sitePreviewCaption.textContent = 'Live source reference · ' + siteName;
+  };
+  sitePreviewImage.onerror = function() {
+    sitePreviewSkeleton.hidden = true;
+    sitePreviewImage.hidden = true;
+    sitePreviewFallback.hidden = false;
+    sitePreviewStatus.textContent = 'Thumbnail unavailable';
+    sitePreviewCaption.textContent = 'Capture continues without a visual thumbnail · ' + siteName;
+  };
+  const previewTarget = siteUrl.replace(/[^A-Za-z0-9._~:\/\/-]/g, function(character) { return encodeURIComponent(character); });
+  sitePreviewImage.src = 'https://image.thum.io/get/width/960/crop/640/noanimate/' + previewTarget;
+}
+
+function setDownloadWaiting() {
+  archiveReady = false;
+  downloadWebsite.dataset.ready = 'false';
+  downloadWebsite.setAttribute('aria-disabled', 'true');
+  downloadWebsite.classList.remove('download-ready');
+  downloadWebsite.classList.add('download-waiting');
+  downloadWebsite.removeAttribute('href');
+  downloadResultLabel.textContent = 'Download website assets';
+  downloadDockTitle.textContent = 'Download not started yet';
+  downloadDockState.textContent = 'Waiting';
+  downloadDockState.className = 'dock-state waiting';
+  downloadDockHint.textContent = 'This button activates a direct ZIP download when your archive is ready.';
+  downloadHelpToggle.style.display = 'flex';
+}
+
+function setDownloadReady(file) {
+  archiveReady = true;
+  const directUrl = '/sites/' + file + '.zip';
+  downloadWebsite.href = directUrl;
+  downloadWebsite.setAttribute('download', file + '.zip');
+  downloadWebsite.dataset.ready = 'true';
+  downloadWebsite.removeAttribute('aria-disabled');
+  downloadWebsite.classList.remove('download-waiting');
+  downloadWebsite.classList.add('download-ready');
+  downloadResultLabel.textContent = 'Download website assets';
+  downloadDockTitle.textContent = 'Your archive is ready';
+  downloadDockState.textContent = 'Ready';
+  downloadDockState.className = 'dock-state ready';
+  downloadDockHint.textContent = 'If your browser pauses the download, use the direct-download help below.';
+  downloadHelpToggle.style.display = 'block';
+  downloadModalDirect.href = directUrl;
+  downloadModalDirect.setAttribute('download', file + '.zip');
+}
+
+function openDownloadModal() {
+  if (archiveReady) {
+    downloadModalTitle.textContent = 'Download did not start?';
+    downloadModalCopy.textContent = 'Some browsers pause automatic downloads or extensions intercept them. Use the direct link below to start the ZIP download manually.';
+    downloadModalDirect.hidden = false;
+  } else {
+    downloadModalTitle.textContent = 'Your archive is still being prepared';
+    downloadModalCopy.textContent = 'Keep this tab open while WebCloner finishes collecting and packaging the accessible files. The direct download will activate here when it is ready.';
+    downloadModalDirect.hidden = true;
+  }
+  downloadModal.hidden = false;
+  document.body.classList.add('modal-open');
+  (archiveReady ? downloadModalDirect : downloadModalDismiss).focus();
+}
+
+function closeDownloadModal() {
+  downloadModal.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function resetProgress() {
+  numberOfFiles = 0;
+  logBuffer = '';
+  startedAt = Date.now();
+  filesCount.textContent = '0';
+  log.textContent = '';
+  progressStatus.textContent = 'Opening ' + hostname(websiteInput.value) + '...';
+  progressSummary.textContent = 'Finding accessible resources.';
+  progressPanel.hidden = false;
+  progressBar.hidden = false;
+  progressBar.setAttribute('aria-busy', 'true');
+  setStage('discover');
+  setDownloadWaiting();
+  loadSitePreview(websiteInput.value);
+}
+
+function appendLog(message) {
+  if (typeof message !== 'string') return;
+  numberOfFiles += (message.match(/\b200 OK\b/g) || []).length;
+  filesCount.textContent = String(numberOfFiles);
+  logBuffer += message;
+  if (logBuffer.length > 12000) logBuffer = logBuffer.slice(-12000);
+  log.textContent = logBuffer;
+  log.scrollTop = log.scrollHeight;
+}
+
+socket.on(localStorage['token'], function(event) {
+  if (!event) return;
+  console.log(event);
+
+  if (event.error) {
+    progressBar.hidden = true;
+    progressBar.setAttribute('aria-busy', 'false');
+    progressPanel.hidden = false;
+    progressSummary.textContent = 'The capture could not finish.';
+    progressStatus.textContent = event.error;
+    downloadDockTitle.textContent = 'Capture stopped';
+    downloadDockState.textContent = 'Try again';
+    downloadDockState.className = 'dock-state failed';
+    downloadDockHint.textContent = 'Review the status above, then start a fresh capture when ready.';
+    setStage('failed');
+    log.textContent = event.error;
+    downloadBtn.disabled = false;
+    return;
+  }
+
+  progressBar.hidden = false;
+  progressBar.setAttribute('aria-busy', 'true');
+  progressPanel.hidden = false;
+
+  if (event.progress === 'Converting') {
+    setStage('package');
+    progressSummary.textContent = 'The archive is being assembled.';
+    progressStatus.textContent = 'Downloaded ' + numberOfFiles + ' files. Compressing archive...';
+    appendLog('Converting downloaded files into a ZIP archive...\n');
+  } else if (event.progress === 'Completed') {
+    setStage('completed');
+    progressBar.hidden = true;
+    progressBar.setAttribute('aria-busy', 'false');
+    progressSummary.textContent = 'Your capture is ready to download.';
+    progressStatus.textContent = 'Completed in ' + Math.max(1, Math.round((Date.now() - startedAt) / 1000)) + 's · ' + numberOfFiles + ' files captured.';
+    appendLog('Archive created successfully.\n');
+    setDownloadReady(event.file);
+    sitePreviewStatus.textContent = 'Captured reference';
+    downloadBtn.disabled = false;
+  } else {
+    setStage(numberOfFiles > 0 ? 'collect' : 'discover');
+    progressSummary.textContent = numberOfFiles > 0 ? 'Collecting accessible resources.' : 'Reading the page structure.';
+    progressStatus.textContent = 'Downloading... ' + numberOfFiles + ' files detected';
+    appendLog(event.progress);
+  }
+});
+
+function startDownload() {
+  const website = normalizeWebsite(websiteInput.value);
+  if (!website) return;
+  websiteInput.value = website;
+  resetProgress();
+  socket.emit('request', { token: localStorage['token'], website: website });
+}
+
+document.getElementById('downloadForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+  startDownload();
+});
+downloadWebsite.addEventListener('click', function(event) {
+  if (!archiveReady) { event.preventDefault(); openDownloadModal(); }
+});
+downloadHelpToggle.addEventListener('click', function() { openDownloadModal(); });
+downloadModalClose.addEventListener('click', closeDownloadModal);
+downloadModalDismiss.addEventListener('click', closeDownloadModal);
+downloadModal.addEventListener('click', function(event) {
+  if (event.target.hasAttribute('data-close-download-modal')) closeDownloadModal();
+});
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && !downloadModal.hidden) closeDownloadModal();
+});
+
+setDownloadWaiting();
+
+function generateToken(length) {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let token = '';
+  for (let i = 0; i < length; i++) token += chars[Math.floor(Math.random() * chars.length)];
+  return token;
+}

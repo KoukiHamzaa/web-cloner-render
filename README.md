@@ -51,6 +51,26 @@ tight negative-tracked display scale; DM Mono covers eyebrows, badges, and the
 technical log. The styling lives entirely in `public/stylesheets/style.css`
 (no CSS framework), so it renders offline.
 
+#### Design gallery — pick the main look 🎪
+
+Five alternative designs were built from scratch (each with its own
+`DESIGN.md` under `design-md/`) and are live as preview routes. Try them, then
+tell us which one should become the main page:
+
+| Preview | Look | Palatte | Type |
+| --- | --- | --- | --- |
+| [/design-v1](/design-v1) | **Inkwell** · editorial notebook | warm paper, ink text, persimmon CTA | Fraunces + Instrument Sans + DM Mono |
+| [/design-v2](/design-v2) | **Phosphor** · retro terminal | CRT green, scanlines, amber/red | JetBrains Mono everywhere |
+| [/design-v3](/design-v3) | **Whitespace** · premium minimal SaaS | white, hairline borders, one blue accent | Space Grotesk + Inter + IBM Plex Mono |
+| [/design-v4](/design-v4) | **Frost** · dark glassmorphism | navy night, aurora glows, ice cyan | Outfit + Inter + IBM Plex Mono |
+| [/design-v5](/design-v5) | **Radix** · noir synthwave | near-black void, magenta→violet→cyan aurora | Unbounded, heavy display |
+
+All five share the exact same capture UI logic
+(`public/js/capture.js` — Socket.IO, progress ring, step states, source
+preview, download dock, and the direct-download modal) and the same page
+content; only the presentation layer differs. Every route keeps the happy
+path: paste an authorized URL → live progress → ready ZIP.
+
 ### Deploy on cloud providers
 
 [![Run on Replit](https://binbashbanana.github.io/deploy-buttons/buttons/remade/replit.svg)](https://replit.com/github/AhmadIbrahiim/Website-downloader)

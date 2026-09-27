@@ -1,0 +1,183 @@
+<header class="shell">
+  <div class="shell-inner">
+    <a class="brand" href="/" aria-label="WebCloner home"><span class="brand-mark" aria-hidden="true">◤</span><span class="brand-name">WebCloner <small>Frost</small></span></a>
+    <nav class="shell-nav" aria-label="Primary navigation">
+      <a href="#features">Features</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#safety">Policy</a>
+      <a class="shell-cta" href="#capture">Capture a site <span aria-hidden="true">→</span></a>
+    </nav>
+  </div>
+</header>
+
+<header class="sr-only" aria-live="polite">
+  <div aria-busy="true" id="progress" hidden aria-label="Downloading" role="progressbar"></div>
+</header>
+
+<main role="main">
+  <section class="hero" id="capture" aria-labelledby="page-title">
+    <div class="hero-inner">
+      <p class="eyebrow"><span class="eyebrow-dot"></span> Arctic-cold capture engine</p>
+      <h1>Download a website's<br /><em>accessible</em> code.</h1>
+      <p class="hero-lede">Preserve the source and assets of a site you own or are authorized to reproduce. One URL in, a clean portable archive out.</p>
+      <ul class="hero-trio" aria-label="Product highlights">
+        <li><span class="trio-diamond">◆</span> Legal-compliant path<small>Own or be authorized</small></li>
+        <li><span class="trio-diamond">◆</span> Flat-file export<small>One clean ZIP</small></li>
+        <li><span class="trio-diamond">◆</span> Live telemetry<small>Follow the capture</small></li>
+      </ul>
+
+      <div class="capture-card">
+        <div class="card-topline">
+          <span class="live-indicator"><span></span> Capture ready</span>
+          <span class="card-kicker">New project · no account</span>
+        </div>
+        <div class="capture-intent">
+          <span class="intent-icon" aria-hidden="true">✦</span>
+          <span><strong>Authorized source</strong><small>Private workflow · zero signup</small></span>
+          <span class="intent-badge">ZIP</span>
+          <span class="intent-badge adaptive">Adaptive</span>
+        </div>
+        <div class="card-heading">
+          <h2>Begin with a URL</h2>
+          <p>WebCloner assembles the HTML, styles, scripts, images, and other resources it can access into a tidy archive.</p>
+        </div>
+
+        <form class="download-form" id="downloadForm">
+          <label class="sr-only" for="website">Website address</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">⌁</span>
+            <input class="website-input" type="text" id="website" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="https://your-website.com" aria-describedby="download-help" required />
+          </div>
+          <button class="download-button" id="download" type="submit"><span>Begin capture</span><span class="button-arrow" aria-hidden="true">→</span></button>
+        </form>
+        <p class="sr-only" id="download-help">Enter a website address such as example.com or https://example.com.</p>
+
+        <div class="capture-meta">
+          <span><span class="checkmark">✓</span> No account required</span>
+          <span><span class="checkmark">✓</span> ZIP export</span>
+          <span><span class="checkmark">✓</span> Live progress</span>
+          <span><span class="checkmark">✓</span> Adaptive engine</span>
+        </div>
+
+        <section class="progress-panel" id="downloadProgress" hidden aria-labelledby="progress-title">
+          <div class="progress-summary">
+            <div><strong id="progress-title">Capture telemetry</strong><p id="progressSummary">Waiting for a capture to begin.</p></div>
+            <span class="download-count">Files downloaded: <span id="nFiles">0</span></span>
+          </div>
+          <div class="capture-progress-grid">
+            <div class="progress-orbit" id="progressRing" data-state="idle" aria-hidden="true">
+              <div class="orbit-core"><span id="progressPhase">Idle</span><strong id="progressPercent">0%</strong></div>
+            </div>
+            <ol class="progress-steps" aria-label="Capture stages">
+              <li class="progress-step" id="progressStep1" data-state="idle"><span class="step-dot">01</span><span><strong>Discover</strong><small>Scanning the page</small></span></li>
+              <li class="progress-step" id="progressStep2" data-state="idle"><span class="step-dot">02</span><span><strong>Collect</strong><small>Fetching accessible files</small></span></li>
+              <li class="progress-step" id="progressStep3" data-state="idle"><span class="step-dot">03</span><span><strong>Package</strong><small>Assembling your ZIP</small></span></li>
+              <li class="progress-step" id="progressStep4" data-state="idle"><span class="step-dot">04</span><span><strong>Ready</strong><small>Archive complete</small></span></li>
+            </ol>
+          </div>
+          <div class="site-preview-panel" id="sitePreviewPanel" hidden>
+            <div class="site-preview-head"><span><span class="preview-live-dot"></span> Source preview</span><span id="sitePreviewStatus">Preparing</span></div>
+            <div class="site-preview-frame">
+              <div class="site-preview-skeleton" id="sitePreviewSkeleton" aria-hidden="true"><span></span><span></span><span></span><div></div></div>
+              <img class="site-preview-image" id="sitePreviewImage" alt="Preview of the website being captured" hidden />
+              <div class="site-preview-fallback" id="sitePreviewFallback" hidden><span id="sitePreviewInitial">W</span><strong id="sitePreviewDomain">Preparing preview</strong><small>This site does not allow a visual thumbnail. Capture progress is still running.</small></div>
+            </div>
+            <p class="site-preview-caption" id="sitePreviewCaption">A visual reference will appear while the archive is being built.</p>
+          </div>
+          <div class="progress-track"><span></span></div>
+          <p class="progress-status" id="downloadStatus" role="status" aria-live="polite">Ready to capture.</p>
+          <details class="raw-log"><summary>View technical log</summary><pre class="log" id="log" aria-label="Download log"></pre></details>
+        </section>
+
+        <div class="download-dock" aria-live="polite">
+          <div class="download-dock-head"><div><span class="dock-eyebrow">Archive handoff</span><strong id="downloadDockTitle">Download not started yet</strong></div><span class="dock-state waiting" id="downloadDockState">Waiting</span></div>
+          <a class="result-button download-waiting" id="downloadResult" href="" download data-ready="false" aria-disabled="true" aria-describedby="downloadDockHint"><span id="downloadResultLabel">Download website assets</span><span aria-hidden="true">↓</span></a>
+          <button class="download-help-toggle" id="downloadHelpToggle" type="button"><span class="help-button-icon" aria-hidden="true">?</span><span class="help-button-copy"><strong>Download not starting?</strong><small>Open direct-download help</small></span><span class="help-button-arrow" aria-hidden="true">→</span></button>
+          <p class="download-dock-hint" id="downloadDockHint">This button activates a direct ZIP download when your archive is ready.</p>
+        </div>
+
+        <div class="download-modal" id="downloadModal" hidden>
+          <div class="download-modal-backdrop" data-close-download-modal></div>
+          <div class="download-modal-card" role="dialog" aria-modal="true" aria-labelledby="downloadModalTitle" aria-describedby="downloadModalCopy">
+            <button class="modal-close" id="downloadModalClose" type="button" aria-label="Close download help">×</button>
+            <span class="modal-icon" aria-hidden="true">↓</span>
+            <p class="eyebrow">Download handoff</p>
+            <h3 id="downloadModalTitle">Your archive is still being prepared</h3>
+            <p id="downloadModalCopy">Keep this tab open while WebCloner finishes collecting and packaging the accessible files. The direct download will activate here when it is ready.</p>
+            <div class="modal-actions"><button class="modal-secondary" id="downloadModalDismiss" type="button">Keep waiting</button><a class="modal-direct" id="downloadModalDirect" href="" download hidden>Try direct download <span aria-hidden="true">→</span></a></div>
+          </div>
+        </div>
+        <p class="permission-note"><span aria-hidden="true">❄</span> Only capture websites and content you own or have permission to reproduce.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section" id="features" aria-labelledby="features-title">
+    <div class="section-heading">
+      <p class="eyebrow">A frozen-simple pipeline</p>
+      <h2 id="features-title">Cold, careful,<br />complete captures.</h2>
+      <p class="section-lede">From first click to final ZIP, WebCloner keeps the collection tidy, traceable, and honest about what it can reach.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card panel">
+        <span class="feature-no">01</span>
+        <div class="feature-icon ice">❆</div>
+        <p class="feature-label">Capture</p>
+        <h3>Collect the front end.<br />Not the noise.</h3>
+        <p>WebCloner brings together the accessible structure, styles, scripts, and resources behind a page — ready to inspect or reuse.</p>
+      </article>
+      <article class="feature-card panel">
+        <span class="feature-no">02</span>
+        <div class="feature-icon frost">➛</div>
+        <p class="feature-label">Develop</p>
+        <h3>A local copy is a<br />working copy.</h3>
+        <p>Take the exported files into an authorized workflow — reviews, audits, migration planning, or a fresh development pass.</p>
+        <a class="text-link" href="#workflow">See the flow <span aria-hidden="true">→</span></a>
+      </article>
+      <article class="feature-card panel">
+        <span class="feature-no">03</span>
+        <div class="feature-icon aurora-green">↓</div>
+        <p class="feature-label">Export</p>
+        <h3>One archive,<br />ready to move.</h3>
+        <p>Hand the clean ZIP to yourself later, to a teammate, or to a review — portable and self-contained.</p>
+        <a class="text-link" href="#capture">Begin a capture <span aria-hidden="true">→</span></a>
+      </article>
+    </div>
+  </section>
+
+  <section class="workflow-section" id="workflow" aria-labelledby="workflow-title">
+    <div class="workflow-frame panel">
+      <p class="eyebrow">How it works</p>
+      <h2 id="workflow-title">Three moves to a local archive.</h2>
+      <p class="workflow-copy">A short loop with visible telemetry at every stage — no guesswork about what the engine is doing.</p>
+      <ol class="steps-list">
+        <li><span class="step-diamond">◆</span><span><strong>Enter an authorized URL</strong><small>A website you own or have permission to reproduce.</small></span></li>
+        <li><span class="step-diamond">◆</span><span><strong>Capture accessible resources</strong><small>WebCloner fetches the source and linked assets it can reach.</small></span></li>
+        <li><span class="step-diamond">◆</span><span><strong>Download the archive</strong><small>Open the ZIP locally and keep building.</small></span></li>
+      </ol>
+    </div>
+    <aside class="telemetry-card panel">
+      <div class="telemetry-head"><span class="telemetry-rows"><i></i><i></i><i></i></span><span class="telemetry-status"><span></span> live</span></div>
+      <div class="telemetry-grid"><span>engine</span><strong>capture.adaptive</strong><span>target</span><strong id="telemetryDomain">unset</strong><span>mode</span><strong>single-page</strong></div>
+      <div class="telemetry-bars"><span style="--h:34%"></span><span style="--h:62%"></span><span style="--h:46%"></span><span style="--h:80%"></span><span style="--h:58%"></span><span style="--h:71%"></span><span style="--h:42%"></span></div>
+      <p class="telemetry-note">The capture feeds live progress into the card above.</p>
+    </aside>
+  </section>
+
+  <section class="safety-card panel" id="safety" aria-labelledby="safety-title">
+    <div class="safety-symbol" aria-hidden="true">✓</div>
+    <div><p class="eyebrow">Frozen to the rules</p><h2 id="safety-title">Technical access, clearly bounded.</h2><p>WebCloner is built for websites and content you own or are authorized to reproduce. It does not bypass logins, paywalls, or access controls, and technical access never grants ownership of third-party content.</p></div>
+  </section>
+
+  <section class="stats-strip" aria-label="Capture attributes">
+    <div class="stats-inner">
+      <div class="stat"><span class="stat-glyph">✓</span><span><strong>Source-level capture</strong><small>HTML, CSS, JS, assets</small></span></div>
+      <div class="stat"><span class="stat-glyph">✓</span><span><strong>Streamlined handoff</strong><small>Paste, capture, download</small></span></div>
+      <div class="stat"><span class="stat-glyph">✓</span><span><strong>Built for real work</strong><small>Backup, migration, dev</small></span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner"><a class="brand" href="/" aria-label="WebCloner home"><span class="brand-mark" aria-hidden="true">◤</span><span class="brand-name">WebCloner <small>Frost</small></span></a><p>Capture what you are authorized to build with.</p><a class="footer-link" href="https://github.com/KoukiHamzaa/Web-cloner" target="_blank" rel="noopener noreferrer">View on GitHub <span aria-hidden="true">→</span></a><span class="footer-tag">design-v4 · frost · <a href="/">main page</a></span></div>
+</footer>
