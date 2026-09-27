@@ -41,24 +41,24 @@ timeout, so a blocked bot challenge no longer means a failed download.
 
 ### Design system 🎨
 
-The interface is a dark, product-focused capture console built from
-`DESIGN.md` — a self-contained design system documenting the palette,
-typography scale, components, and agent prompt guide. The look: a deep
-forest-black canvas (`#0b110f`), charcoal-green surface panels separated by
-hairline borders, a single emerald accent for the CTA and focus states, coral
-for signpost emphasis, and mint for success. Manrope handles all type with a
-tight negative-tracked display scale; DM Mono covers eyebrows, badges, and the
-technical log. The styling lives entirely in `public/stylesheets/style.css`
-(no CSS framework), so it renders offline.
+The main interface is the **Phosphor** design — a retro terminal built from
+`design-md/design-v2/DESIGN.md`. The look: a near-black CRT screen
+(`#0d120b`) with faint scanlines, hairline green-border panels, a single
+phosphor-green accent (`#7dff9a`) for the CTA and focus states, amber for
+warnings, red for errors, and cyan for adaptive badges. JetBrains Mono covers
+everything — headings, labels, badges, and the technical log — topped by a
+window chrome with traffic lights and a menu bar. The styling lives entirely
+in `public/stylesheets/style.css` (no CSS framework), so it renders offline.
 
-#### Design gallery — pick the main look 🎪
+#### Design gallery 🎪
 
-Five alternative designs were built from scratch (each with its own
-`DESIGN.md` under `design-md/`) and are live as preview routes. Try them, then
-tell us which one should become the main page:
+The five from-scratch designs (each with its own `DESIGN.md` under
+`design-md/`) remain live as preview routes, with the main page now running the
+chosen winner. The gallery:
 
 | Preview | Look | Palatte | Type |
 | --- | --- | --- | --- |
+| `/` (main) | **Phosphor** ★ chosen | CRT green, scanlines, amber/red | JetBrains Mono everywhere |
 | [/design-v1](/design-v1) | **Inkwell** · editorial notebook | warm paper, ink text, persimmon CTA | Fraunces + Instrument Sans + DM Mono |
 | [/design-v2](/design-v2) | **Phosphor** · retro terminal | CRT green, scanlines, amber/red | JetBrains Mono everywhere |
 | [/design-v3](/design-v3) | **Whitespace** · premium minimal SaaS | white, hairline borders, one blue accent | Space Grotesk + Inter + IBM Plex Mono |
