@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "export NODE_ENV=Development && npm start",
-    "test": "node --check app.js && node --check bin/www && node --check routes/index.js && node --check wget/index.js && node --check socket/socket.js && node test/wget-acceptance.test.js"
+    "test": "node --check app.js && node --check bin/www && node --check routes/index.js && node --check wget/index.js && node --check socket/socket.js && node --check stealth/links.js && node --check stealth/robots.js && node --check stealth/crawler.js && node test/wget-acceptance.test.js && node test/stealth-links.test.js"
   },
   "dependencies": {
     "archiver": "^3.1.1",

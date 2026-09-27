@@ -1,7 +1,7 @@
 ## Complete Website Downloader 💾
 Download the complete source code of any website (including all assets) 🔨.
 
-👉 Live Demo: https://website-downloader.onrender.com
+👉 Live Demo: https://web-cloner-x3a3.onrender.com
 
 ![enter image description here](https://github.com/AhmadIbrahiim/Website-downloader/blob/master/public/Record.gif?raw=true)
 
@@ -17,6 +17,27 @@ Website downloader works with `wget` and `archiver` to download website assets, 
 - `--adjust-extension` adds suitable extensions to downloaded files.
 - `--page-requisites` downloads assets required to display the page.
 - `--no-parent` prevents recursion above the requested path.
+
+## Adaptive capture engine 🕷️
+
+Many sites now answer wget's plain client with a 403, a robots.txt exclusion, or
+a TLS refusal while happily serving the same content to a browser. So the
+download runs in two tiers:
+
+1. **Tier 1 — wget mirror.** The classic recursive, link-converting mirror above.
+   Fast and polite on cooperative sites.
+2. **Tier 2 — adaptive engine.** If the first pass saves *no files*, the engine
+   automatically retries the same capture the way a browser would: realistic
+   Chrome request headers, bounded concurrency, a throttle that backs off on
+   `429`/`403`, robots.txt respect, a live `Summary` line streamed every few
+   seconds, and link rewriting that keeps the archive fully viewable offline —
+   styled after the adaptive scraper ideas in
+   [Scrapling](https://github.com/D4Vinci/Scrapling).
+
+Both tiers write the same job-directory layout and emit the same progress shape,
+so zipping, cleanup, and the Socket.IO UI are unchanged. The adaptive engine is
+pure Node (native `fetch`, no extra runtime) and keeps the same quota and
+timeout, so a blocked bot challenge no longer means a failed download.
 
 ### Deploy on cloud providers
 
@@ -85,8 +106,8 @@ committed to this repository trigger both deployments.
 
 ## Requirements 📦
 
-- Node.js 20 or newer
-- `wget` on the `PATH`. The app shells out to it, and nothing will download without it:
+- Node.js 20 or newer (the adaptive engine uses the native `fetch` API)
+- `wget` on the `PATH` powers the primary tier; without it the adaptive engine still downloads:
   - Debian/Ubuntu: `apt install wget`
   - macOS: `brew install wget`
   - Windows: `winget install JernejSimoncic.Wget`
@@ -104,8 +125,20 @@ committed to this repository trigger both deployments.
 | Variable | Default | What it does |
 | --- | --- | --- |
 | `PORT` | `3000` | Port the server listens on |
-| `DOWNLOAD_QUOTA` | `100m` | Size ceiling passed to wget, so one request cannot fill the disk |
-| `DOWNLOAD_TIMEOUT_MS` | `300000` | How long a single download may run before it is stopped |
+| `DOWNLOAD_QUOTA` | `100m` | Size ceiling passed to both engines, so one request cannot fill the disk |
+| `DOWNLOAD_TIMEOUT_MS` | `300000` | How long a single download (both tiers combined) may run before it is stopped |
+| `STEALTH_ENABLED` | `true` | `false` disables the adaptive engine and reports tier-1 failures directly |
+| `STEALTH_CONCURRENCY` | `6` | How many pages/requisites the adaptive engine fetches at once |
+| `STEALTH_MAX_PAGES` | `200` | Cap on recursive page fetches per capture |
+| `STEALTH_RESPECT_ROBOTS` | `true` | `false` lets the adaptive engine ignore robots.txt Disallow rules |
+| `STEALTH_REQUEST_TIMEOUT_MS` | `30000` | Per-request timeout for the adaptive engine's fetches |
+
+## Tests
+
+`npm test` runs `node --check` across the application and stealth modules plus
+two offline suites: `test/wget-acceptance.test.js` (URL parsing and crawl
+domains) and `test/stealth-links.test.js` (link rewriting, path safety, and
+robots parsing). Requires Node 20 or newer, like the app itself.
 
 # How To Contribute:
 - Open issues with any bugs you notice.

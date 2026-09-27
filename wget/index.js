@@ -3,18 +3,37 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 var archive = require('../archiver');
+var stealth = require('../stealth/crawler');
 
 /**
- * Every download gets its own directory under downloads/, which keeps two
- * people downloading the same site from writing into each other's files and
- * keeps cleanup from ever reaching outside this folder.
+ * Adaptive capture pipeline.
+ *
+ * Tier 1 is the classic wget mirror: recursive, link-converting, honorable to
+ * robots.txt, and fast on cooperative sites.
+ *
+ * Tier 2 is the adaptive engine. Many sites now answer the plain wget client
+ * with a 403, a robots.txt exclusion or a TLS refusal while happily serving a
+ * normal browser. When tier 1 saves nothing, the adaptive engine automatically
+ * retries the same capture the way a browser would: realistic headers, bounded
+ * concurrency, a throttle that backs off on 429/403, and the same quota and
+ * timeout. Both tiers write the same job-directory layout and emit the same
+ * progress shape, so zipping, cleanup, and the socket UI are unchanged.
  */
+
 var DOWNLOAD_ROOT = path.join(__dirname, '..', 'downloads');
 
 // wget mirrors recursively, so without a ceiling a single request can fill the
 // disk. Both limits can be raised through the environment.
 var QUOTA = process.env.DOWNLOAD_QUOTA || '100m';
 var TIMEOUT_MS = Number(process.env.DOWNLOAD_TIMEOUT_MS) || 5 * 60 * 1000;
+
+// Adaptive engine tuning. All stealthed only when enabled; the default keeps
+// the rescue behaviour on so blocked sites still end up downloadable.
+var STEALTH_ENABLED = process.env.STEALTH_ENABLED !== 'false';
+var STEALTH_CONCURRENCY = Number(process.env.STEALTH_CONCURRENCY) || 6;
+var STEALTH_MAX_PAGES = Number(process.env.STEALTH_MAX_PAGES) || 200;
+var STEALTH_REQUEST_TIMEOUT_MS = Number(process.env.STEALTH_REQUEST_TIMEOUT_MS) || 30 * 1000;
+var STEALTH_RESPECT_ROBOTS = process.env.STEALTH_RESPECT_ROBOTS !== 'false';
 
 /**
  * wget --mirror --convert-links --adjust-extension --page-requisites
@@ -46,6 +65,46 @@ module.exports = (socket, data, onFinished) => {
     return null;
   }
 
+  var settled = false;
+  var cancelled = false;
+  var timedOut = false;
+  var stderrTail = [];
+  var fallbackHandle = null;
+
+  var fail = (message) => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    removeJobDir(jobDir);
+    send({ error: message });
+    done();
+  };
+
+  var finalize = () => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    send({ progress: 'Converting' });
+
+    var zipName = target.hostname.replace(/[^a-zA-Z0-9._-]/g, '_') + '-' + jobId;
+    archive(jobDir, zipName, (err, name) => {
+      removeJobDir(jobDir);
+      if (err) {
+        send({ error: 'The site downloaded but could not be compressed: ' + err.message });
+      } else {
+        send({ progress: 'Completed', file: name });
+      }
+      done();
+    });
+  };
+
+  var timer = setTimeout(() => {
+    timedOut = true;
+    if (fallbackHandle) fallbackHandle.cancel();
+    fail('The download took longer than ' + Math.round(TIMEOUT_MS / 1000) +
+         ' seconds and was stopped. Try a smaller site or a specific page.');
+  }, TIMEOUT_MS);
+
   // execFile rather than exec: the address is passed as a separate argument and
   // never reaches a shell, so it cannot be used to run other commands.
   var crawlDomains = buildCrawlDomains(target.hostname);
@@ -58,25 +117,6 @@ module.exports = (socket, data, onFinished) => {
     '--domains=' + crawlDomains.join(','),
     target.href
   ], { cwd: jobDir, maxBuffer: 32 * 1024 * 1024 });
-
-  var settled = false;
-  var cancelled = false;
-  var timedOut = false;
-  var stderrTail = [];
-
-  var timer = setTimeout(() => {
-    timedOut = true;
-    child.kill();
-  }, TIMEOUT_MS);
-
-  var fail = (message) => {
-    if (settled) return;
-    settled = true;
-    clearTimeout(timer);
-    removeJobDir(jobDir);
-    send({ error: message });
-    done();
-  };
 
   // Fires when wget itself cannot be started, which on a fresh machine almost
   // always means it is not installed.
@@ -99,46 +139,70 @@ module.exports = (socket, data, onFinished) => {
     if (settled) return;
     clearTimeout(timer);
 
+    if (timedOut) return;
     if (cancelled) {
       settled = true;
       removeJobDir(jobDir);
       done();
       return;
     }
-    if (timedOut) {
-      fail('The download took longer than ' + Math.round(TIMEOUT_MS / 1000) +
-           ' seconds and was stopped. Try a smaller site or a specific page.');
-      return;
-    }
 
     // Trust the filesystem rather than wget's output. wget writes nothing at
-    // all for an off-site redirect, a robots.txt exclusion or a 403, and the
-    // previous approach of naming the folder from the first "Resolving" line
-    // then archived a directory that was never created.
+    // all for an off-site redirect, a robots.txt exclusion or a 403. When
+    // nothing landed, hand the job to the adaptive engine before giving up.
     if (countFiles(jobDir) === 0) {
-      fail('Nothing could be downloaded from ' + target.hostname + '. ' +
-           explainFailure(stderrTail, code));
+      if (STEALTH_ENABLED) {
+        runAdaptiveFallback();
+      } else {
+        fail('Nothing could be downloaded from ' + target.hostname + '. ' +
+             explainFailure(stderrTail, code));
+      }
       return;
     }
 
-    settled = true;
-    send({ progress: 'Converting' });
-
-    var zipName = target.hostname.replace(/[^a-zA-Z0-9._-]/g, '_') + '-' + jobId;
-    archive(jobDir, zipName, (err, name) => {
-      removeJobDir(jobDir);
-      if (err) {
-        send({ error: 'The site downloaded but could not be compressed: ' + err.message });
-      } else {
-        send({ progress: 'Completed', file: name });
-      }
-      done();
-    });
+    finalize();
   });
+
+  function runAdaptiveFallback() {
+    send({ progress: 'This site is blocking plain requests. Switching to the adaptive engine…\n' });
+    timer = setTimeout(() => {
+      timedOut = true;
+      fallbackHandle.cancel();
+      fail('Neither the standard nor the adaptive engine finished within ' +
+           Math.round(TIMEOUT_MS / 1000) + ' seconds. Try a smaller site or a specific page.');
+    }, TIMEOUT_MS);
+
+    fallbackHandle = stealth({
+      target: target,
+      jobDir: jobDir,
+      quotaBytes: parseSize(QUOTA) || Infinity,
+      timeoutMs: TIMEOUT_MS,
+      requestTimeoutMs: STEALTH_REQUEST_TIMEOUT_MS,
+      concurrency: STEALTH_CONCURRENCY,
+      respectRobots: STEALTH_RESPECT_ROBOTS,
+      maxPages: STEALTH_MAX_PAGES
+    }, function (payload) {
+      if (!settled) send(payload);
+    }, function (result) {
+      if (settled) return;
+      clearTimeout(timer);
+      if (result && result.error) {
+        fail(result.error);
+        return;
+      }
+      if (countFiles(jobDir) === 0) {
+        fail('Nothing could be downloaded from ' + target.hostname +
+             ' even after retrying with the adaptive engine.');
+        return;
+      }
+      finalize();
+    });
+  }
 
   return {
     cancel: function () {
       cancelled = true;
+      if (fallbackHandle) fallbackHandle.cancel();
       child.kill();
     }
   };
@@ -177,8 +241,21 @@ function buildCrawlDomains(hostname) {
   return domains;
 }
 
+/**
+ * "100m", "2g", "512K" and plain numbers all become a byte count.
+ */
+function parseSize(value) {
+  if (typeof value !== 'string') value = String(value == null ? '' : value);
+  var match = value.trim().match(/^(\d+)\s*([kKmMgGtT]?)$/);
+  if (!match) return null;
+  var unit = (match[2] || '').toLowerCase();
+  var multiplier = { '': 1, k: 1024, m: 1024 * 1024, g: 1024 * 1024 * 1024, t: 1024 * 1024 * 1024 * 1024 };
+  return Number(match[1]) * multiplier[unit];
+}
+
 module.exports.parseTarget = parseTarget;
 module.exports.buildCrawlDomains = buildCrawlDomains;
+module.exports.parseSize = parseSize;
 
 /**
  * wget's closing lines are usually a summary, so the last line is rarely the
