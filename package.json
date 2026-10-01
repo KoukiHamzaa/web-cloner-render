@@ -11,15 +11,14 @@
     "test": "node --check app.js && node --check bin/www && node --check routes/index.js && node --check wget/index.js && node --check socket/socket.js && node --check stealth/links.js && node --check stealth/robots.js && node --check stealth/crawler.js && node test/wget-acceptance.test.js && node test/stealth-links.test.js"
   },
   "dependencies": {
-    "archiver": "^3.1.1",
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.19.2",
-    "hbs": "~4.2.0",
-    "http-errors": "~1.6.3",
+    "archiver": "^7.0.1",
+    "cookie-parser": "~1.4.7",
+    "debug": "^4.4.3",
+    "express": "^4.21.2",
+    "hbs": "~4.3.1",
+    "http-errors": "^2.0.1",
     "jszip": "^3.8.0",
-    "morgan": "~1.9.1",
-    "socket.io": "^2.5.0",
-    "socket.io-client": "^2.5.0"
+    "morgan": "~1.12.1",
+    "socket.io": "^4.8.1"
   }
 }

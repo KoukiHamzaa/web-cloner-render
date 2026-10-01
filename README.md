@@ -158,6 +158,26 @@ Two caveats to know before enabling it:
   `KEEP_AWAKE=false` (or a schedule that stops pinging) if you want the service
   to sleep and save hours instead.
 
+### Capture pacing and socket origins
+
+Two guards keep one visitor from exhausting the server:
+
+- **Global concurrency cap** (`MAX_CONCURRENT_JOBS`, default `3`). A capture
+  that is already running counts against the cap; once it is full, further
+  requests get a clear "server is busy" error and are simply rejected (no
+  queueing). Behaviour change: during bursts, some legitimate submissions are
+  asked to retry.
+- **Per-IP cooldown** (`JOB_COOLDOWN_MS`, default `15000`). The same IP cannot
+  start another capture until the delay has passed; set to `0` to disable.
+  Behaviour change: rapid repeat submissions are throttled with a "wait a few
+  seconds" message. Neither guard affects health checks or page loads.
+
+Socket.IO connections are scoped to the origins listed in `ALLOWED_ORIGINS`
+(`render.yaml` pins the Render hostname). Unset keeps the library default of
+any origin — set it when you know the exact hostnames so a third-party site
+cannot open connections against the service. If the Cloudflare Worker proxy
+domain is used as the public hostname, add that origin here too.
+
 ## Requirements 📦
 
 - Node.js 20 or newer (the adaptive engine uses the native `fetch` API)
@@ -189,6 +209,9 @@ Two caveats to know before enabling it:
 | `KEEP_AWAKE` | auto (Render) | `false` disables the self keep-alive on Render; `true` forces it locally |
 | `KEEP_AWAKE_URL` | `RENDER_EXTERNAL_URL` | Public URL the keep-alive pings (`/healthz`) |
 | `KEEP_AWAKE_INTERVAL_MS` | `600000` | Ping cadence; clamped between `60000` and `840000` (Render sleeps after 15 min idle) |
+| `MAX_CONCURRENT_JOBS` | `3` | Global cap of simultaneous captures, so one visitor cannot exhaust the server |
+| `JOB_COOLDOWN_MS` | `15000` | Minimum delay before the same IP may start another capture (`0` disables) |
+| `ALLOWED_ORIGINS` | unset (all) | Comma-separated http(s) origins allowed to open a Socket.IO connection; unset keeps the library default (any origin) |
 
 ## Tests
 

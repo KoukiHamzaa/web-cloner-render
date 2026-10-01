@@ -20,7 +20,20 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-var io = require('socket.io')(server);
+
+// Restrict which origins may open a Socket.IO connection. When ALLOWED_ORIGINS
+// is set (comma-separated http(s) origins), any other Origin header is refused.
+// Unset means the Socket.IO default (all origins) — the live service pins the
+// Render origin via render.yaml so only that hostname can connect.
+var socketIoOptions = { serveClient: true };
+var allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(function (origin) { return origin.trim(); })
+  .filter(Boolean);
+if (allowedOrigins.length) {
+  socketIoOptions.cors = { origin: allowedOrigins, methods: ['GET', 'POST'] };
+}
+var io = require('socket.io')(server, socketIoOptions);
 
 // Pass socket Object to it's modula 
 require('../socket/socket')(io)
